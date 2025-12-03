@@ -44,22 +44,58 @@ if [ -n "$WRT_PACKAGE" ]; then
 	echo -e "$WRT_PACKAGE" >> ./.config
 fi
 
-#高通平台调整
-DTS_PATH="./target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/"
+# 高通平台 NSS 补丁
 if [[ "${WRT_TARGET^^}" == *"QUALCOMMAX"* ]]; then
-	#取消nss相关feed
-	echo "CONFIG_FEED_nss_packages=n" >> ./.config
-	echo "CONFIG_FEED_sqm_scripts_nss=n" >> ./.config
-	#开启sqm-nss插件
-	echo "CONFIG_PACKAGE_luci-app-sqm=y" >> ./.config
-	echo "CONFIG_PACKAGE_sqm-scripts-nss=y" >> ./.config
-	#设置NSS版本
-	echo "CONFIG_NSS_FIRMWARE_VERSION_11_4=n" >> ./.config
-	if [[ "${WRT_CONFIG,,}" == *"ipq50"* ]]; then
-		echo "CONFIG_NSS_FIRMWARE_VERSION_12_2=y" >> ./.config
-	else
-		echo "CONFIG_NSS_FIRMWARE_VERSION_12_5=y" >> ./.config
-	fi
+    echo -e "\n>>> Applying ultimate NSS full-blood patch for qualcommax ..."
+
+    # ============================
+    # 安全写入函数
+    # ============================
+    cfg_set() {
+        local key="$1"
+        local val="$2"
+        sed -i "/^${key}=/d" ./.config 2>/dev/null || true
+        echo "${key}=${val}" >> ./.config
+    }
+
+    # =====================================
+    # 打开 NSS feed
+    # =====================================
+    cfg_set "CONFIG_FEED_nss_packages" "y"
+
+    # =====================================
+    # NSS 满血
+    # =====================================
+    cfg_set "CONFIG_PACKAGE_kmod-qca-nss-drv-stats"   "y"
+    cfg_set "CONFIG_PACKAGE_kmod-qca-nss-drv-netlink" "y"
+    cfg_set "CONFIG_PACKAGE_kmod-qca-nss-drv-profile" "y"
+
+    # =====================================
+    # SQM – NSS 加速版本
+    # =====================================
+    cfg_set "CONFIG_PACKAGE_luci-app-sqm"     "y"
+    cfg_set "CONFIG_PACKAGE_sqm-scripts-nss"  "y"
+
+    # =====================================
+    # NSS 固件版本（自动区分 ipq50xx / ipq60xx / ipq80xx）
+    # =====================================
+    cfg_set "CONFIG_NSS_FIRMWARE_VERSION_11_4" "n"
+    if [[ "${WRT_CONFIG,,}" == *"ipq50"* ]]; then
+        cfg_set "CONFIG_NSS_FIRMWARE_VERSION_12_2" "y"
+    else
+        cfg_set "CONFIG_NSS_FIRMWARE_VERSION_12_5" "y"
+    fi
+
+    echo ">>> NSS full-blood patch applied successfully!"
+fi
+
+# ============================
+# 最终 NSS 关键配置自检
+# ============================
+echo -e "\n=== Final NSS Critical Config Check ==="
+grep -E 'CONFIG_FEED_nss_packages|kmod-qca-nss-drv-|NSS_FIRMWARE_VERSION|sqm-scripts-nss' ./.config || true
+echo "======================================\n"
+
 	#无WIFI配置调整Q6大小
 	if [[ "${WRT_CONFIG,,}" == *"wifi"* && "${WRT_CONFIG,,}" == *"no"* ]]; then
 		find $DTS_PATH -type f ! -iname '*nowifi*' -exec sed -i 's/ipq\(6018\|8074\).dtsi/ipq\1-nowifi.dtsi/g' {} +
