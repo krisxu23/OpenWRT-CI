@@ -1,119 +1,92 @@
 <div align="center">
-OpenWrt · 京东云无线宝 亚瑟 RE-SS-01（IPQ6018）
-1GB 满血 NSS WiFi 旗舰版｜by Kris Xu｜2025
+OpenWrt · 京东云无线宝 亚瑟 RE-SS-01（IPQ60xx）
+ImmortalWrt 满血 NSS 旗舰版｜WiFi 增强｜2025
+![alt text](https://img.shields.io/badge/OpenWrt-ImmortalWrt-blue?style=flat-square&logo=openwrt)
 
+![alt text](https://img.shields.io/badge/Platform-Qualcomm%20IPQ60xx-orange?style=flat-square&logo=qualcomm)
 
+![alt text](https://img.shields.io/badge/Kernel-6.6%2F6.12-brightgreen?style=flat-square&logo=linux)
 
+![alt text](https://img.shields.io/badge/NSS-Full%20Offload%2012.5-8A2D00?style=flat-square)
 
+![alt text](https://img.shields.io/badge/WiFi-Ath11k%20Original-critical?style=flat-square&logo=wifi)
 
-
-
-
-
-
-
-
+![alt text](https://img.shields.io/github/actions/workflow/status/你的用户名/仓库名/IPQ60XX-WIFI-YES.yml?branch=main&label=CI%20Build&style=flat-square)
 </div>
-⚠️ Warning 刷机前必读（非常重要！）
-
+⚠️ Warning 刷机前必读
 [!IMPORTANT]
-本固件仅针对已硬改 1GB 内存的 RE-SS-01（亚瑟）编译！
-原厂 512MB 机器刷入会持续重启或无法开机，已在编译时强制开启 IPQ_MEM_PROFILE_1024，不兼容小内存。
-
-刷机有风险，操作需谨慎，作者不承担任何砖。
-
+本固件基于 VIKINGYFY/ImmortalWrt 源码构建，采用 Qualcommax 新平台架构。
+NSS 版本：默认启用 NSS 12.5 固件，开启全量硬件加速（SFE/Flow Offload）。
+WiFi 驱动：集成 ath11k 原厂固件与板级数据，提供优秀的无线性能。
+初始密码：为了安全起见，固件默认无密码，首次登录请设置密码。
+刷机有风险，操作需谨慎，请确保了解 U-Boot 刷机流程。
 ℹ️ 基础信息 (Basic Info)
 项目	内容	备注
-默认管理地址	192.168.2.1	Config / Scripts 已固定
+默认管理地址	192.168.2.1	可在 config 中自定义
 默认用户名	root	
-默认密码	首次登录要求设置	LuCI 会弹出改密码页面
-默认 WiFi 名称	ImmortalWrt	可在 Scripts / UCI 默认修改
-默认 WiFi 密码	12345678	可在 Scripts / UCI 默认修改
-源码基底	ImmortalWrt 6.12 主线 + 自研补丁	每日同步上游
-内核版本	Linux 6.12.y（长期维护分支）	
-NSS 固件版本	官方最新 12.5 分支	性能、稳定性最优
-内存策略	CONFIG_IPQ_MEM_PROFILE_1024=y	1GB 内存机器专用
-WiFi 驱动	ath11k / MAC80211 全套驱动	支持 2.4/5GHz + Mesh
+默认密码	无 (None)	首次访问 Web 界面无需密码
+WiFi 名称 (SSID)	ImmortalWrt	默认开启
+WiFi 密码	12345678	WPA2/WPA3 混合加密
+源码基底	ImmortalWrt Main 分支	紧跟上游更新
+核心架构	Qualcommax / IPQ60xx	下一代高通开源驱动架构
 🚀 核心特色 (Features)
 ⚡ 极致性能与硬件加速
-
-🧬 1GB 内存全释放
-IPQ_MEM_PROFILE_1024 + NSS_MEM_PROFILE_HIGH + ATH11K_MEM_PROFILE_1024M 全开，队列数满载
-
-🚀 满血 NSS 硬件加速
-默认加载：
-
-kmod-qca-nss-drv + kmod-qca-nss-pbuf + ecm + sqm-scripts-nss
-
-2.5G 口实测 PPPoE + NAT + SQM 可稳定跑满 2.3–2.4 Gbps
-
-WireGuard / IPSec 硬件加密加速
-AES/SHA 完全走 NSS 加密引擎，实测 WireGuard 1.8 Gbps+
-
-📂 极速存储与 NAS 体验
-
-原生支持 NTFS3（内核态）、exFAT、Btrfs、EXT4
-
-Diskman + 自动挂载 + 一键扩容 + smartmontools 全套硬盘工具
-
-ZRAM 256MB 换页，1GB 内存下流畅运行多任务
-
-🌐 网络连接与增强
-
-HomeProxy + sing-box 轻量科学上网代理
-
-MosDNS 本地智能分流
-
-luci-app-ttyd 网页终端
-
-luci-app-cpufreq 动态调频
-
-luci-app-sqm + sqm-scripts-nss（Cake 可硬件加速）
-
-完整 USB 网络共享（iPhone ipheth、华为 HiLink、5G 模组全支持）
-
-🔌 外设与系统工具
-
-最新 Argon 主题（暗色/透明/毛玻璃） + Argon-Config 一键切换
-
-系统首次启动自动显示详细固件信息
-
-luci-app-autoreboot、luci-app-gecoosac、luci-app-netspeedtest、luci-app-partexp、luci-app-samba4、luci-app-upnp 等工具集成
-
-各类 USB 外设支持完整（音频、存储、网卡、调试接口等）
-
-🛠️ 运维工具链
-
-htop、iperf3、curl、coremark、bash、usbutils、mmc-utils、nand-utils、fdisk、gdisk、blkid、usbmuxd、openssh-keygen、openssl-util
-
-Docker / containerd / runc 可选（源码保留，不默认安装）
-
-🔧 编译与定制
-
-GitHub Actions 自动化编译：支持 workflow_run 与 workflow_dispatch
-
-配置完全自定义，可添加/删除插件，支持仅生成 config 文件
-
-支持 NSS、IPQ60xx WiFi 满血补丁，TailScale / Rust / DiskMan 等问题修复
-
-🤝 致谢 (Credits)（排名不分先后）
-
-ImmortalWrt 主线源码
-→ https://github.com/immortalwrt/immortalwrt
-
-VIKINGYFY（IPQ60xx NSS 优化补丁长期维护）
-→ https://github.com/VIKINGYFY/immortalwrt
-
-sbwml（Golang / MosDNS / Argon 主题维护）
-→ https://github.com/sbwml
-
-nikkinikki-org / sirpdboy / Lisaac / Loyalsoldier / EasyTier 等
-→ 提供各类高性能插件和科学网络软件包
-
-所有默默为 IPQ60xx / NSS / ImmortalWrt 生态贡献的前辈们
-
+🚀 满血 NSS 12.5 加速
+默认集成 kmod-qca-nss-drv、sqm-scripts-nss 及全套 NSS 组件。支持有线/无线硬件卸载，显著降低 CPU 占用。
+📶 WiFi 性能增强
+集成 ath11k-firmware-ipq60xx 及 boarddata，支持 Mesh 组网 (kmod-ath11k + MAC80211_MESH)。
+🛠 内核与系统优化
+启用 BBR 拥塞控制，支持 ZRAM 内存压缩，优化小内存设备体验。
+🌍 网络科学与分流
+HomeProxy (Sing-box)：预置 Surge 规则（ChinaIP/GFWList），开箱即用，轻量且强大。
+MosDNS v5：集成高性能 DNS 分流工具，抗污染能力强。
+内网穿透全家桶：集成 Tailscale、EasyTier、VNT、DDNS-Go、UPnP，满足各种远程访问需求。
+📂 存储与多媒体
+NAS 级文件服务：预装 Samba4 (SMB共享)，支持 NTFS3、Btrfs、EXT4 等主流文件系统。
+下载与管理：
+qBittorrent：高性能下载工具。
+Diskman：图形化磁盘管理工具（已修复 NTFS3 挂载问题）。
+PartExp：一键分区扩容工具，方便利用剩余空间。
+🔌 丰富的 USB 外设支持
+全能 USB 网络支持：
+支持 Android (RNDIS)、iPhone (Ipheth)、华为 (NCM/HiLink) 及各类 4G/5G 模组 (QMI/MBIM/ECM)。
+包含：kmod-usb-net-huawei-cdc-ncm、kmod-usb-net-qmi-wwan 等全套驱动。
+🎨 界面与交互
+定制 Argon 主题：默认修改为清新的 Teal (#31a1a1) 配色，集成 Argon-Config 支持自定义背景。
+实用面板：
+NetSpeedTest：内网测速工具。
+TTYD：网页版终端命令行。
+GecoosAC：AC控制器支持。
+📦 包含插件列表 (Package List)
+类型	插件名称	说明
+核心	luci-app-homeproxy	新一代 Sing-box 代理客户端
+DNS	luci-app-mosdns	灵活的 DNS 分流工具
+共享	luci-app-samba4	Windows 文件共享
+下载	luci-app-qbittorrent	BT/PT 下载神器
+穿透	luci-app-tailscale	零配置 VPN 组网
+穿透	luci-app-ddns-go	多平台 DDNS 客户端
+管理	luci-app-diskman	磁盘分区与挂载管理
+管理	luci-app-partexp	剩余空间自动扩容
+系统	luci-app-ttyd	网页终端
+系统	luci-app-autoreboot	计划重启
+网络	luci-app-upnp	通用即插即用
+网络	luci-app-netspeedtest	网络速度测试
+🔨 如何使用 (How to Build)
+本项目支持 GitHub Actions 云编译，配置位于 .github/workflows/IPQ60XX-WIFI-YES.yml。
+Fork 本仓库 到你的 GitHub 账号。
+进入 Actions 页面，选择 IPQ60XX-WIFI-YES。
+点击 Run workflow。
+PACKAGE：(可选) 手动输入需要增加的插件包名。
+TEST：(可选) 勾选后仅输出配置文件，不进行长时间编译。
+等待编译完成后，在 Actions 详情页下载固件。
+🤝 致谢 (Credits)
+源码来源：VIKINGYFY/immortalwrt
+主题来源：jerrykuku/luci-theme-argon
+插件来源：
+kenzok8/small-package
+sbwml/openwrt_pkgs
+sirpdboy/luci-app-partexp
+VIKINGYFY/homeproxy
 <div align="center">
-
-<sub>Built with ❤️ by Kris Xu — 专为 1GB 亚瑟玩家打造的满血 WiFi 旗舰固件</sub>
-
+<sub>Built with ❤️ by GitHub Actions</sub>
 </div>
