@@ -132,6 +132,6 @@
 
 编译固件就像烹饪，这份配置是精心调配的食谱。<br>愿你的网络，从此快如闪电，稳若磐石。
 
-<sub>Built with ❤️ by GitHub Actions</sub>
+<sub>Built with ❤️ by Kris Xu</sub>
 
 </div>
