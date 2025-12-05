@@ -1,124 +1,136 @@
 <div align="center">
 
-# OpenWrt · 京东云无线宝 亚瑟 RE-SS-01 (IPQ60xx)
-### ImmortalWrt 满血 NSS 旗舰版｜WiFi 增强｜2025
+# 🚀 OpenWrt for 京东云无线宝 亚瑟 RE-SS-01
+### 专为IPQ6018深度定制 · 满血NSS加速 · 旗舰级功能集成
 
-![System](https://img.shields.io/badge/OpenWrt-ImmortalWrt-blue?style=flat-square&logo=openwrt)
+![OpenWrt](https://img.shields.io/badge/OpenWrt-ImmortalWrt%20Master-blue?style=flat-square&logo=openwrt)
 ![Platform](https://img.shields.io/badge/Platform-Qualcomm%20IPQ60xx-orange?style=flat-square&logo=qualcomm)
-![Kernel](https://img.shields.io/badge/Kernel-6.6%2F6.12-brightgreen?style=flat-square&logo=linux)
-![NSS](https://img.shields.io/badge/NSS-Full%20Offload%2012.5-8A2D00?style=flat-square)
-![WiFi](https://img.shields.io/badge/WiFi-Ath11k%20Original-critical?style=flat-square&logo=wifi)
-![Build](https://img.shields.io/github/actions/workflow/status/你的用户名/仓库名/IPQ60XX-WIFI-YES.yml?branch=main&label=CI%20Build&style=flat-square)
+![Kernel](https://img.shields.io/badge/Kernel-6.12.y-brightgreen?style=flat-square&logo=linux)
+![NSS](https://img.shields.io/badge/NSS-Hardware%20Offload%2012.2-8A2D00?style=flat-square)
+![License](https://img.shields.io/badge/License-GPL--2.0-lightgrey?style=flat-square)
+
+**为硬核玩家与家庭极客打造的，在京东云亚瑟（IPQ6018）上功能最全面、性能最极致的OpenWrt固件之一。**
+
+[核心特性](#-核心特性) | [刷机警告](#-刷机前重要警告) | [功能详情](#-功能详解) | [致谢](#-致谢)
 
 </div>
 
 ---
 
-## ⚠️ Warning 刷机前必读
+## ⚠️ 刷机前重要警告
 
-> [!IMPORTANT]
-> **本固件基于 VIKINGYFY/ImmortalWrt 源码构建，采用 Qualcommax 新平台架构。**
-> 1. **NSS 版本**：默认启用 NSS 12.5 固件，开启全量硬件加速（SFE/Flow Offload）。
-> 2. **WiFi 驱动**：集成 `ath11k` 原厂固件与板级数据，提供优秀的无线性能。
-> 3. **初始密码**：为了安全起见，固件默认无密码，首次登录请设置密码。
-
-> 刷机有风险，操作需谨慎，请确保了解 U-Boot 刷机流程。
+> **🚨 内存配置警告**
+> 本固件配置文件已启用 `CONFIG_IPQ_MEM_PROFILE_1024=y`，**仅适用于硬改1024MB内存的京东云亚瑟路由器**。**请勿**在原厂为512MB内存的设备上使用，否则可能出现兼容性问题。
+>
+> **🔐 风险自担**
+> 刷机有风险，操作需谨慎。请确保你理解每一步操作的含义，并自行承担可能产生的后果。
 
 ---
 
-## ℹ️ 基础信息 (Basic Info)
+## ✨ 核心特性
 
-| 项目 | 内容 | 备注 |
-| :--- | :--- | :--- |
-| **默认管理地址** | `192.168.2.1` | 固件默认 IP |
-| **默认用户名** | `root` | |
-| **默认密码** | **无** (None) | 首次访问 Web 界面无需密码 |
-| **WiFi 名称** | `ImmortalWrt` | 默认开启 |
-| **WiFi 密码** | `12345678` | WPA2/WPA3 混合加密 |
-| **源码基底** | ImmortalWrt Main | 每日紧跟上游更新 |
-| **核心架构** | Qualcommax / IPQ60xx | 下一代高通开源驱动架构 |
+*   **⚡ 极致性能**：深度优化内核与NSS驱动，释放高通IPQ6018芯片全部潜力。
+*   **🔧 功能完整**：从最全的USB支持到现代防火墙，满足高级用户一切想象。
+*   **🛡️ 稳定高效**：历经多轮配置优化与冲突解决，追求长期稳定运行。
+*   **🎯 开箱即用**：集成常用插件与优化设置，减少繁琐配置。
+
+## 📋 固件信息
+
+| 项目 | 详情 |
+| :--- | :--- |
+| **目标设备** | `jdcloud,re-ss-01` (京东云无线宝 亚瑟) |
+| **SOC平台** | Qualcomm IPQ6018 (ARM Cortex-A53) |
+| **源码基底** | ImmortalWrt Master Branch |
+| **内核版本** | Linux 6.12.y |
+| **管理地址** | `192.168.2.1` (首次启动请使用此地址) |
+| **用户名/密码** | `root` / 无 (首次登录需在LuCI界面设置) |
+| **无线SSID** | `OpenWrt-2.4G` & `OpenWrt-5G` (默认密码12345678) |
+
+## 🛠️ 功能详解
+
+### 1. 🧠 网络与硬件加速 (NSS)
+这是本固件的灵魂。通过完整的高通网络子系统 (NSS) 驱动，实现了网络数据的硬件级加速，极大提升转发效率与降低CPU负载。
+
+| 模块 | 功能 |
+| :--- | :--- |
+| **核心驱动** | `kmod-qca-nss-drv` |
+| **连接加速** | `kmod-qca-nss-ecm` (增强连接管理) |
+| **协议卸载** | `kmod-qca-nss-drv-pppoe` / `-pptp` / `-l2tpv2` |
+| **队列管理** | `kmod-qca-nss-drv-qdisc` |
+| **桥接加速** | `kmod-qca-nss-drv-bridge-mgr` (优化局域网互访) |
+| **智能组播** | `kmod-qca-nss-drv-igs` |
+| **SQM优化** | `sqm-scripts-nss` (NSS专用的智能队列管理) |
+
+### 2. 📂 完整的存储与USB支持
+堪称“USB大全”，支持几乎所有主流存储设备和网络共享方式。
+
+*   **文件系统**：EXT4, F2FS, NTFS3, exFAT, XFS, VFAT。
+*   **USB控制器**：完整支持XHCI (USB 3.0)、EHCI/OHCI (USB 2.0)。
+*   **USB网络共享**：
+    *   `kmod-usb-net-rndis` (Android/Windows)
+    *   `kmod-usb-net-ipheth` (iPhone)
+    *   `kmod-usb-net-huawei-cdc-ncm` (华为随行WiFi)
+    *   `kmod-usb-net-qmi-wwan` / `-mbim` (4G/5G上网卡)
+    *   `kmod-usb-net-asix-ax88179` / `-rtl8152` (常见USB有线网卡)
+*   **工具**：完整的 `usbutils`、`block-mount`、`automount`。
+
+### 3. 🔐 现代防火墙与网络
+拥抱未来，使用基于nftables的Firewall4，并精简冗余配置。
+
+*   **防火墙**：`firewall4` + `nftables-json`。
+*   **NAT**：采用 `kmod-nft-fullcone` (NAT1)，移除旧的iptables模块避免冲突。
+*   **隧道协议**：WireGuard、GRE、VXLAN、SIT等完整支持。
+*   **流量管理**：`kmod-sched-cake` (CAKE QoS)、`kmod-ifb`。
+
+### 4. 🧩 核心插件与系统工具
+精心挑选的LuCI应用与系统工具，兼顾实用与强大。
+
+| 类别 | 包含的插件/工具 |
+| :--- | :--- |
+| **网络服务** | `luci-app-homeproxy` (sing-box) / `luci-app-mosdns` / `luci-app-ddns` / `luci-app-upnp` / `luci-app-zerotier` |
+| **存储管理** | `luci-app-diskman` (磁盘管理) / `luci-app-samba4` (网络共享) |
+| **系统工具** | `luci-app-ttyd` (网页终端) / `luci-app-autoreboot` / `luci-app-netspeedtest` |
+| **主题界面** | `luci-theme-argon` + `luci-app-argon-config` (现代化主题) |
+| **性能工具** | `htop` / `iperf3` / `coremark` / `smartmontools` / `zram-swap` |
+| **内核优化** | TCP BBR / 透明大页(MADVISE模式) / ZRAM / SKB Recycler |
+
+### 5. ⚙️ 编译与性能优化
+固件在编译阶段即注入性能基因。
+
+*   **编译优化**：`-O3 -pipe -march=armv8-a+crypto+crc -mcpu=cortex-a53+crypto+crc`
+*   **内核配置**：启用CGROUP、PERF_EVENTS、PMU等，方便性能分析与调优。
+*   **无线加密**：使用 `wpad-openssl` 提供完整WPA3与企业级特性支持。
+
+## 📦 如何获取与使用
+
+1.  **下载固件**：在 [Releases](../../releases) 页面下载最新的 `*-sysupgrade.bin` 文件。
+2.  **刷入设备**：通过原厂系统升级页面、uboot控制台或其它刷机方法，将固件刷入你的京东云亚瑟路由器。
+3.  **首次配置**：
+    *   连接至 `OpenWrt` 无线网络或有线LAN口。
+    *   浏览器访问 `http://192.168.2.1`。
+    *   **首要步骤**：按照LuCI提示，立即设置一个强密码。
+    *   根据向导配置网络（WAN口）并探索丰富功能。
+
+## 🙏 致谢
+
+本固件的诞生离不开以下开源项目与社区的贡献，在此表示诚挚的感谢（排名不分先后）：
+
+*   **[ImmortalWrt](https://github.com/immortalwrt/immortalwrt)**：提供了稳定、前瞻的OpenWrt源码基底。
+*   **[OpenWrt](https://openwrt.org/)** & **[LEDE](https://lede-project.org/)**：伟大的开源路由器系统。
+*   **所有软件包的维护者**：特别是 `kenzok8/small-package`, `LI-Bwrt`, 以及各大 feeds 中的贡献者。
+*   **高通及相关芯片开发者**：提供了强大的硬件平台与内核驱动。
+*   **OpenWrt 中文社区**：无数教程、经验分享与问题解答，是学习路上的明灯。
+
+## 📄 许可证
+
+本项目遵循其源码基底（ImmortalWrt/OpenWrt）所采用的 **GPL-2.0** 开源许可证。具体条款见 [LICENSE](LICENSE) 文件。
 
 ---
-
-## 🚀 核心特色 (Features)
-
-### ⚡ 极致性能与硬件加速
-- **🚀 满血 NSS 12.5 加速**
-  默认集成 `kmod-qca-nss-drv`、`sqm-scripts-nss` 及全套 NSS 组件。支持有线/无线硬件卸载，显著降低 CPU 占用，跑满千兆/2.5G无压力。
-- **📶 WiFi 性能增强**
-  集成 `ath11k-firmware-ipq60xx` 及 `boarddata`，支持 Mesh 组网 (`kmod-ath11k` + `MAC80211_MESH`)。
-- **🛠 内核与系统优化**
-  启用 `BBR` 拥塞控制，支持 `ZRAM` 内存压缩，优化小内存设备体验。
-
-### 🌍 网络科学与分流
-- **HomeProxy (Sing-box)**：预置 Surge 规则（ChinaIP/GFWList），开箱即用，轻量且强大。
-- **MosDNS v5**：集成高性能 DNS 分流工具，抗污染能力强。
-- **内网穿透全家桶**：集成 `Tailscale`、`EasyTier`、`VNT`、`DDNS-Go`、`UPnP`，满足各种远程访问需求。
-
-### 📂 存储与多媒体
-- **NAS 级文件服务**：预装 `Samba4` (SMB共享)，支持 `NTFS3` (内核级驱动)、`Btrfs`、`EXT4` 等主流文件系统。
-- **下载与管理**：
-  - `qBittorrent`：高性能下载工具。
-  - `Diskman`：图形化磁盘管理工具（已修复 NTFS3 挂载问题）。
-  - `PartExp`：一键分区扩容工具，方便利用剩余空间。
-
-### 🔌 丰富的 USB 外设支持
-- **全能 USB 网络支持**：
-  支持 Android (RNDIS)、iPhone (Ipheth)、华为 (NCM/HiLink) 及各类 4G/5G 模组 (QMI/MBIM/ECM)。
-  包含：`kmod-usb-net-huawei-cdc-ncm`、`kmod-usb-net-qmi-wwan` 等全套驱动。
-
-### 🎨 界面与交互
-- **定制 Argon 主题**：默认修改为清新的 **Teal (#31a1a1)** 配色，集成 `Argon-Config` 支持自定义背景。
-- **实用面板**：
-  - `NetSpeedTest`：内网测速工具。
-  - `TTYD`：网页版终端命令行。
-  - `GecoosAC`：AC控制器支持。
-
----
-
-## 📦 包含插件列表 (Package List)
-
-| 类型 | 插件名称 | 说明 |
-| :--- | :--- | :--- |
-| **核心** | `luci-app-homeproxy` | 新一代 Sing-box 代理客户端 |
-| **DNS** | `luci-app-mosdns` | 灵活的 DNS 分流工具 |
-| **共享** | `luci-app-samba4` | Windows 文件共享 |
-| **下载** | `luci-app-qbittorrent` | BT/PT 下载神器 |
-| **穿透** | `luci-app-tailscale` | 零配置 VPN 组网 |
-| **穿透** | `luci-app-ddns-go` | 多平台 DDNS 客户端 |
-| **管理** | `luci-app-diskman` | 磁盘分区与挂载管理 |
-| **管理** | `luci-app-partexp` | 剩余空间自动扩容 |
-| **系统** | `luci-app-ttyd` | 网页终端 |
-| **系统** | `luci-app-autoreboot` | 计划重启 |
-| **网络** | `luci-app-upnp` | 通用即插即用 |
-| **网络** | `luci-app-netspeedtest` | 网络速度测试 |
-
----
-
-## 🔨 如何使用 (How to Build)
-
-本项目支持 GitHub Actions 云编译，配置位于 `.github/workflows/IPQ60XX-WIFI-YES.yml`。
-
-1. **Fork 本仓库** 到你的 GitHub 账号。
-2. 进入 **Actions** 页面，选择 **IPQ60XX-WIFI-YES**。
-3. 点击 **Run workflow**。
-   - `PACKAGE`：(可选) 手动输入需要增加的插件包名，多个用空格隔开。
-   - `TEST`：(可选) 勾选后仅输出配置文件，不进行长时间编译。
-4. 等待编译完成后，在 Actions 详情页下载固件。
-
----
-
-## 🤝 致谢 (Credits)
-
-- **源码来源**：[VIKINGYFY/immortalwrt](https://github.com/VIKINGYFY/immortalwrt)
-- **主题来源**：[jerrykuku/luci-theme-argon](https://github.com/jerrykuku/luci-theme-argon)
-- **插件来源**：
-  - [kenzok8/small-package](https://github.com/kenzok8/small-package)
-  - [sbwml/openwrt_pkgs](https://github.com/sbwml)
-  - [sirpdboy/luci-app-partexp](https://github.com/sirpdboy/luci-app-partexp)
-  - [VIKINGYFY/homeproxy](https://github.com/VIKINGYFY/homeproxy)
-
 <div align="center">
+
+**如果你喜欢这个项目，请点个 Star ⭐ 以示支持！**
+
+编译固件就像烹饪，这份配置是精心调配的食谱。<br>愿你的网络，从此快如闪电，稳若磐石。
 
 <sub>Built with ❤️ by GitHub Actions</sub>
 
