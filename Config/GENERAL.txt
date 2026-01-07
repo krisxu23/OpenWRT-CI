@@ -1,38 +1,85 @@
-# ====== 通用配置 ======
-
-# --- 编译与语言 ---
+# --- 3. 编译与语言优化 (通用部分) ---
 CONFIG_DEVEL=y
 CONFIG_CCACHE=y
-CONFIG_TARGET_OPTIONS=y
-CONFIG_TARGET_OPTIMIZATION="-O2 -pipe -march=armv8-a+crypto+crc -mcpu=cortex-a53+crypto+crc -mtune=cortex-a53"
 CONFIG_LUCI_LANG_zh_Hans=y
 CONFIG_PACKAGE_default-settings=y
 CONFIG_PACKAGE_default-settings-chn=y
 
-# --- USB 通用工具 ---
-CONFIG_PACKAGE_libusb-1.0=y
+# --- 5. 无线驱动 (用户态组件) ---
+CONFIG_PACKAGE_wpad-openssl=y
 
-# --- 磁盘管理与文件系统（通用） ---
+# --- 6. USB支持 (通用外设层) ---
+# USB存储
+CONFIG_PACKAGE_kmod-usb-storage=y
+CONFIG_PACKAGE_kmod-usb-storage-uas=y
+CONFIG_PACKAGE_kmod-scsi-core=y
+
+# USB网络共享 (全面覆盖各平台)
+CONFIG_PACKAGE_kmod-usb-net=y
+CONFIG_PACKAGE_kmod-usb-net-rndis=y          # Windows USB共享
+CONFIG_PACKAGE_kmod-usb-net-ipheth=y         # iPhone USB共享
+CONFIG_PACKAGE_kmod-usb-net-cdc-ether=y      # Android/Linux USB共享
+CONFIG_PACKAGE_kmod-usb-net-cdc-ncm=y        # 现代Android
+CONFIG_PACKAGE_kmod-usb-net-cdc-mbim=y       # 4G/5G模块
+CONFIG_PACKAGE_kmod-usb-net-qmi-wwan=y       # QMI协议
+CONFIG_PACKAGE_kmod-usb-net-asix-ax88179=y   # 千兆USB网卡
+CONFIG_PACKAGE_kmod-usb-net-rtl8152=y        # 常见USB网卡
+
+# USB串口 (调试备用)
+CONFIG_PACKAGE_kmod-usb-serial=y
+CONFIG_PACKAGE_kmod-usb-serial-qualcomm=y
+CONFIG_PACKAGE_kmod-usb-acm=y
+
+# 字符集支持
+CONFIG_PACKAGE_kmod-nls-base=y
+CONFIG_PACKAGE_kmod-nls-utf8=y
+CONFIG_PACKAGE_kmod-nls-cp437=y
+CONFIG_PACKAGE_kmod-nls-iso8859-1=y
+
+# USB工具
+CONFIG_PACKAGE_libusb-1.0=y
+# BusyBox 已提供 lsusb，避免与 usbutils 冲突
+# CONFIG_PACKAGE_usbutils is not set
+
+# --- 7. ZRAM优化 (统一无冲突配置) ---
+# 明确：LZ4默认压缩算法，LZ4 backend，无LZO backend
+CONFIG_PACKAGE_zram-swap=y
+CONFIG_PACKAGE_kmod-zram=y
+CONFIG_KERNEL_ZRAM_DEF_COMP_LZ4=y
+CONFIG_KERNEL_ZRAM_BACKEND_LZ4=y
+# CONFIG_KERNEL_ZRAM_BACKEND_LZO is not set
+# CONFIG_ZRAM_DEF_COMP_ZSTD is not set
+
+# --- 8. 磁盘管理与文件系统 ---
 CONFIG_PACKAGE_fdisk=y
 CONFIG_PACKAGE_lsblk=y
 CONFIG_PACKAGE_block-mount=y
 CONFIG_PACKAGE_automount=y
 CONFIG_PACKAGE_luci-app-diskman=y
 
-CONFIG_PACKAGE_kmod-fs-ext4=y
-CONFIG_PACKAGE_kmod-fs-exfat=y
-CONFIG_PACKAGE_kmod-fs-ntfs3=y
-CONFIG_PACKAGE_kmod-fs-vfat=y
-CONFIG_PACKAGE_kmod-fs-f2fs=y
+# 文件系统支持
+CONFIG_PACKAGE_kmod-fs-ext4=y          # 主系统
+CONFIG_PACKAGE_kmod-fs-exfat=y         # U盘通用
+CONFIG_PACKAGE_kmod-fs-ntfs3=y         # Windows磁盘 (高性能首选)
+CONFIG_PACKAGE_kmod-fs-vfat=y          # 旧U盘兼容
+CONFIG_PACKAGE_kmod-fs-f2fs=y          # eMMC优化
+# CONFIG_PACKAGE_kmod-fs-xfs is not set
+# CONFIG_PACKAGE_kmod-fs-btrfs is not set
+
 CONFIG_PACKAGE_e2fsprogs=y
 CONFIG_PACKAGE_fstrim=y
 
-# --- Docker / 容器 ---
+# --- 9. Docker内核最小完整集 ---
+# 命名空间
 CONFIG_PACKAGE_kmod-namespaces=y
+# Cgroups
 CONFIG_PACKAGE_kmod-cgroup-core=y
 CONFIG_PACKAGE_kmod-cgroup-pids=y
 CONFIG_PACKAGE_kmod-cgroup-device=y
 CONFIG_PACKAGE_kmod-cgroup-freezer=y
+# CONFIG_PACKAGE_kmod-cgroup-cpuset is not set
+# CONFIG_PACKAGE_kmod-cgroup-hugetlb is not set
+# 文件系统与网络
 CONFIG_PACKAGE_kmod-fs-overlayfs=y
 CONFIG_PACKAGE_kmod-fuse=y
 CONFIG_PACKAGE_kmod-bridge=y
@@ -41,10 +88,12 @@ CONFIG_PACKAGE_kmod-nf-nat=y
 CONFIG_PACKAGE_kmod-nf-conntrack=y
 CONFIG_PACKAGE_kmod-ipt-conntrack=y
 CONFIG_PACKAGE_kmod-ipt-nat=y
+# 其他必要
 CONFIG_PACKAGE_kmod-dummy=y
 CONFIG_PACKAGE_kmod-macvlan=y
 
-# --- 网络协议（通用） ---
+# --- 10. 网络协议与防火墙 (混合路线) ---
+# 基础协议
 CONFIG_PACKAGE_kmod-bonding=y
 CONFIG_PACKAGE_proto-bonding=y
 CONFIG_PACKAGE_kmod-gre=y
@@ -54,24 +103,26 @@ CONFIG_PACKAGE_kmod-tun=y
 CONFIG_PACKAGE_kmod-wireguard=y
 CONFIG_PACKAGE_luci-proto-wireguard=y
 
-# --- 加密 / 压缩库 ---
+# 加密模块
 CONFIG_PACKAGE_kmod-crypto-acompress=y
 CONFIG_PACKAGE_kmod-crypto-crc32=y
 CONFIG_PACKAGE_kmod-crypto-lib-chacha20=y
 CONFIG_PACKAGE_kmod-crypto-lib-chacha20poly1305=y
 CONFIG_PACKAGE_kmod-crypto-lib-curve25519=y
 CONFIG_PACKAGE_kmod-crypto-lib-poly1305=y
+
+# 压缩库
 CONFIG_PACKAGE_kmod-lib-lzo=y
 CONFIG_PACKAGE_kmod-lib-zstd=y
 
-# --- 防火墙（通用方案） ---
+# 混合防火墙路线
 CONFIG_PACKAGE_iptables-nft=y
 CONFIG_PACKAGE_ip6tables-nft=y
 CONFIG_PACKAGE_kmod-nft-compat=y
 CONFIG_PACKAGE_kmod-ipt-fullconenat=y
 CONFIG_PACKAGE_kmod-nft-tproxy=y
 
-# --- 核心工具 ---
+# --- 11. 核心工具 ---
 CONFIG_PACKAGE_htop=y
 CONFIG_PACKAGE_curl=y
 CONFIG_PACKAGE_tcping=y
@@ -81,7 +132,7 @@ CONFIG_PACKAGE_ca-bundle=y
 CONFIG_PACKAGE_zoneinfo-asia=y
 CONFIG_PACKAGE_openssh-sftp-server=y
 
-# --- LuCI 核心与应用 ---
+# --- 12. LuCI核心与应用 ---
 CONFIG_PACKAGE_luci=y
 CONFIG_PACKAGE_luci-base=y
 CONFIG_PACKAGE_luci-compat=y
@@ -93,10 +144,12 @@ CONFIG_PACKAGE_luci-mod-status=y
 CONFIG_PACKAGE_luci-mod-system=y
 CONFIG_PACKAGE_rpcd-mod-luci=y
 
+# 主题
 CONFIG_PACKAGE_luci-theme-argon=y
 CONFIG_PACKAGE_luci-app-argon-config=y
 CONFIG_PACKAGE_luci-theme-bootstrap=y
 
+# 基础应用
 CONFIG_PACKAGE_luci-app-firewall=y
 CONFIG_PACKAGE_luci-app-upnp=y
 CONFIG_PACKAGE_luci-app-wol=y
@@ -107,7 +160,7 @@ CONFIG_PACKAGE_luci-app-sqm=y
 CONFIG_PACKAGE_luci-app-ddns=y
 CONFIG_PACKAGE_luci-app-zerotier=y
 
-# --- 科学上网 ---
+# 科学上网 (homeproxy + sing-box全功能)
 CONFIG_PACKAGE_luci-app-homeproxy=y
 CONFIG_PACKAGE_sing-box=y
 CONFIG_SING_BOX_BUILD_WIREGUARD=y
@@ -118,13 +171,28 @@ CONFIG_SING_BOX_BUILD_ACME=y
 CONFIG_SING_BOX_BUILD_REALITY_SERVER=y
 CONFIG_SING_BOX_BUILD_CLASH_API=y
 
-# --- BusyBox ---
+# --- 14. 编译选项 (Busybox) ---
 CONFIG_BUSYBOX_CUSTOM=y
 CONFIG_BUSYBOX_CONFIG_TELNET=y
 CONFIG_BUSYBOX_CONFIG_LSUSB=y
 
-# --- 精简 ---
-# CONFIG_KERNEL_DEBUG_INFO is not set
-# CONFIG_KERNEL_DEBUG_KERNEL is not set
-# CONFIG_TARGET_ROOTFS_INITRAMFS is not set
-CONFIG_TARGET_ROOTFS_INITRAMFS=n
+# ===== 后期可扩展模块（按需opkg安装）=====
+# Docker完整套件：
+# opkg install docker docker-compose luci-app-dockerman
+#
+# 高级文件系统：
+# opkg install kmod-fs-btrfs btrfs-progs
+# opkg install kmod-fs-xfs xfsprogs
+#
+# 高级NSS功能：
+# opkg install kmod-qca-nss-drv-lag-mgr kmod-qca-nss-drv-pptp
+# opkg install kmod-qca-nss-drv-map-t kmod-qca-nss-drv-vxlan
+#
+# 其他科学插件：
+# opkg install luci-app-passwall
+#
+# 网络诊断：
+# opkg install tcpdump nmap
+#
+# 存储工具：
+# opkg install smartmontools hdparm
