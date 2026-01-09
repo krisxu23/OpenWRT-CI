@@ -69,7 +69,6 @@
 
 **启用方式：**
 
-```bash
 opkg update
 opkg install dockerd docker-compose luci-app-docker
 
