@@ -44,9 +44,11 @@ CONFIG_PACKAGE_kmod-nls-iso8859-1=y
 
 # USB工具
 CONFIG_PACKAGE_usbutils=n
-CONFIG_PACKAGE_libusb-1.0=y
-CONFIG_PACKAGE_usbmuxd=y
+CONFIG_PACKAGE_usbutils=y        # 启用完整版 lsusb（必须）
 CONFIG_BUSYBOX_CONFIG_LSUSB=y
+# CONFIG_BUSYBOX_CONFIG_LSUSB is not set   # 禁用 BusyBox 自带的 lsusb（必须，防止冲突）
+CONFIG_PACKAGE_libusb-1.0=y      # 保留，usbutils 需要它来解析设备名称
+CONFIG_PACKAGE_usbmuxd=y         # 保留，如果你需要 iPhone/iPad USB 连接（搭配 libimobiledevice 使用）
 
 # --- 4. ZRAM优化 (针对1GB内存设备：禁用) ---
 # 完全禁用zram相关包和模块
