@@ -43,10 +43,10 @@ CONFIG_PACKAGE_kmod-nls-cp437=y
 CONFIG_PACKAGE_kmod-nls-iso8859-1=y
 
 # USB工具
+CONFIG_PACKAGE_usbutils=n
 CONFIG_PACKAGE_libusb-1.0=y
 CONFIG_PACKAGE_usbmuxd=y
-# BusyBox 已提供 lsusb，避免与 usbutils 冲突
-# CONFIG_PACKAGE_usbutils is not set
+CONFIG_BUSYBOX_CONFIG_LSUSB=y
 
 # --- 4. ZRAM优化 (针对1GB内存设备：禁用) ---
 # 完全禁用zram相关包和模块
