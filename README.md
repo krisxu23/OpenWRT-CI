@@ -1,77 +1,88 @@
 # 🚀 OpenWrt 京东云亚瑟（1GB 硬改版）专用固件
 
 <div align="center">
-  <img src="https://img.shields.io/badge/OpenWrt-23.05-blue?logo=openwrt">
-  <img src="https://img.shields.io/badge/Platform-IPQ60xx-ff69b4">
-  <img src="https://img.shields.io/badge/Memory-1GB%20(Hardware%20Mod)-brightgreen">
-  <img src="https://img.shields.io/badge/NSS-Acceleration-yellow">
-  <img src="https://img.shields.io/badge/Docker-Supported-orange">
-  <img src="https://img.shields.io/badge/Build-Automated%20via%20GitHub%20Actions-success">
+<img src="https://img.shields.io/badge/OpenWrt-23.05-blue?logo=openwrt">
+<img src="https://img.shields.io/badge/Platform-IPQ60xx-ff69b4">
+<img src="https://img.shields.io/badge/Memory-1GB%20(Hardware%20Mod)-brightgreen">
+<img src="https://img.shields.io/badge/NSS-Acceleration-yellow">
+<img src="https://img.shields.io/badge/Docker-Supported-orange">
+<img src="https://img.shields.io/badge/Build-Automated%20via%20GitHub%20Actions-success">
 </div>
 
 ---
 
-## ⚠️ 重要警告
-**本固件仅适用于已硬改内存为 1GB 的京东云亚瑟（JDCloud RE-ss-01）！**  
-原厂 512MB 内存设备 **切勿刷入**，否则将无法启动甚至变砖。  
+## ⚠️ 注意事项
+**本固件默认针对已硬改内存为 1GB 的京东云亚瑟（JDCloud RE-ss-01）！**  
+原厂 512MB 内存设备 **切勿直接刷入**，否则无法启动。  
 
-> 内存配置已针对 1GB 深度优化（`IPQ_MEM_PROFILE_1024` + `ATH11K_MEM_PROFILE_1G`），非 1GB 设备请勿使用。
-
----
-
-## 🔥 核心亮点
-
-### ⚡ 全速 NSS 硬件加速
-- 有线 + 无线均启用 NSS 卸载（`kmod-ath11k-nss`）  
-- CPU 占用降低，吞吐量提升  
-
-### 🐳 Docker 容器原生支持
-- 内核集成必要模块（`veth`、`bridge`、`iptables-nft`）  
-- 预装 `dockerd` 与 `luci-app-dockerman`  
-- 可轻松运行各类容器  
-
-### 🌐 完整网络功能
-- nftables 防火墙  
-- WireGuard / Tailscale  
-- SQM QoS，多线聚合  
-- 4G/5G 模组驱动  
-
-### 🧩 丰富 LuCI 应用
-- 代理：homeproxy / nikki / openclash  
-- 存储：diskman / samba4  
-- DNS：mosdns  
-- 主题：argon  
-- 网络测速工具  
-
-### 🤖 全自动编译流水线
-- GitHub Actions 每日检查源码更新  
-- 一键触发，ccache 加速编译  
+> 内存优化已针对 1GB 深度调优（`IPQ_MEM_PROFILE_1024` + `ATH11K_MEM_PROFILE_1G`），NSS 全速硬件加速，CPU 占用低、吞吐高。
 
 ---
 
-## 📦 快速开始
-1. Fork 本仓库 → 进入 **Actions** 标签页  
+## 🔧 512MB 内存设备修改说明
+如果你使用的是 **原厂 512MB 内存设备**，请在编译前进行以下修改：
+
+1. **修改内存配置**  
+   - 打开 `Config/IPQ60XX-WIFI-YES.txt` 或你使用的 config 文件  
+   - 注释或删除：
+     ```text
+     CONFIG_IPQ_MEM_PROFILE_1024=y
+     CONFIG_ATH11K_MEM_PROFILE_1G=y
+     ```
+   - 添加或启用：
+     ```text
+     CONFIG_IPQ_MEM_PROFILE_512=y
+     CONFIG_ATH11K_MEM_PROFILE_512M=y
+     ```
+
+2. **检查 NSS 内存配置**  
+   - 如果你希望开启 NSS 硬件加速，请确认 `CONFIG_NSS_MEM_PROFILE_HIGH` 是否会超出 512MB，可改为低/中档配置（可参考 GENERAL.txt NSS 设置）。
+
+3. **重新编译固件**  
+   - GitHub Actions 手动触发 workflow  
+   - 可选输入插件配置，保持与 1GB 版本一致  
+   - 编译完成后，下载固件即可刷入 512MB 设备  
+
+> ⚠️ 注意：原厂 512MB 内存设备使用 1GB 配置刷入可能导致系统无法启动或变砖，请务必修改配置。
+
+---
+
+## 🔥 核心亮点（适用于 1GB / 512MB 调整后）
+### ⚡ 网络性能与硬件加速
+- 高通 NSS 硬件卸载（有线 + 无线，可根据内存调整）  
+- 支持 Mesh WiFi 与 ath11k 驱动  
+- ARMv8 硬件加密（AES/SHA）  
+
+### 🌐 网络功能
+- nftables 防火墙、多线聚合  
+- WireGuard、Tailscale、SQM QoS  
+- USB 网卡、4G/5G 模组支持  
+
+### 🐳 Docker 原生支持
+- 内核自带 veth/bridge/iptables-nft  
+- 预装 `dockerd` + `luci-app-dockerman`  
+
+### 🧩 LuCI 管理与应用
+- 系统管理：diskman、partexp、cpufreq、cpulimit、ttyd、ramfree  
+- 代理与 DNS：homeproxy、mosdns、openclash、nikki、momo  
+- 网络测速与监控：netspeedtest、iperf3、coremark  
+- 主题：argon（默认）、aurora、kucat  
+
+---
+
+## 📦 快速使用
+1. Fork 仓库 → Actions 标签页  
 2. 选择 **QCA-ALL 工作流** → 点击 **Run workflow**  
-3. （可选）在输入框添加额外插件，每行一个 `CONFIG_PACKAGE_xxx=y`  
-4. 编译完成后，在 **Releases** 页面下载固件  
+3. （可选）手动调整插件配置  
+4. 编译完成后下载固件  
 
-**默认配置：**  
-- IP：`192.168.2.1`  
-- WiFi：`ImmortalWrt / 12345678`  
-- 主题：argon  
-
----
-
-## 🔧 自定义编译
-- 修改默认配置：编辑 `Config/IPQ60XX-WIFI-YES.txt`（已合并 GENERAL.txt 通用包）  
-- 增减插件：手动触发工作流时，通过插件包输入框添加或移除  
-- 测试配置：勾选 **仅输出配置文件**，生成 `.config` 而不编译固件  
+**默认配置：** IP 192.168.2.1 | WiFi ImmortalWrt / 12345678 | 主题 argon  
 
 ---
 
 ## 🙏 致谢
-- VIKINGYFY / immortalwrt 源码基础  
-- OpenWrt 社区及所有插件作者  
+- VIKINGYFY / ImmortalWrt  
+- OpenWrt 社区及插件作者  
 - Loyalsoldier 规则集  
 
-⭐ 如果这个固件对你有帮助，请给个 **Star** 支持！
+⭐ 如果固件对你有帮助，请给个 **Star** 支持！
