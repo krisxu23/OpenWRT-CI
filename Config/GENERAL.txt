@@ -37,6 +37,7 @@ CONFIG_PACKAGE_proto-bonding=y
 CONFIG_PACKAGE_luci-proto-relay=y
 CONFIG_PACKAGE_iptables-nft=y
 CONFIG_PACKAGE_ip6tables-nft=y
+CONFIG_PACKAGE_kmod-bridge=y
 
 # -----------------------------------------------------------------------------
 # LuCI 界面与语言支持
