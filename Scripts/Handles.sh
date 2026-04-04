@@ -16,7 +16,7 @@ if [ -d *"homeproxy"* ]; then
 	git clone -q --depth=1 --single-branch --branch "release" "https://github.com/Loyalsoldier/surge-rules.git" ./$HP_RULE/
 	cd ./$HP_RULE/ && RES_VER=$(git log -1 --pretty=format:'%s' | grep -o "[0-9]*")
 
-	echo $RES_VER | tee china_ip4.ver china_ip6.ver china_list.ver gfw_list.ver
+	echo "$RES_VER" | tee china_ip4.ver china_ip6.ver china_list.ver gfw_list.ver
 	awk -F, '/^IP-CIDR,/{print $2 > "china_ip4.txt"} /^IP-CIDR6,/{print $2 > "china_ip6.txt"}' cncidr.txt
 	sed 's/^\.//g' direct.txt > china_list.txt ; sed 's/^\.//g' gfw.txt > gfw_list.txt
 	mv -f ./{china_*,gfw_list}.{ver,txt} ../$HP_PATH/resources/
@@ -110,18 +110,21 @@ if [ -d *"luci-app-netspeedtest"* ]; then
 	cd $PKG_PATH && echo "netspeedtest has been fixed!"
 fi
 
+# ==================== 启用BBR拥塞控制 ====================
+echo " "
+echo "启用BBR拥塞控制依赖..."
+echo "CONFIG_PACKAGE_kmod-tcp-bbr=y" >> ./.config
+echo "✓ BBR内核模块已添加"
+
 # ==================== 添加自定义启动脚本 ====================
+echo " "
 echo "添加自定义启动脚本..."
 mkdir -p package/base-files/files/etc
 cat > package/base-files/files/etc/rc.local << 'EOF'
-
-# 设置CPU性能模式
-echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor 2>/dev/null
-
-# 启用BBR拥塞控制
-echo net.core.default_qdisc=fq > /etc/sysctl.conf
-echo net.ipv4.tcp_congestion_control=bbr >> /etc/sysctl.conf
-sysctl -p
+# 设置 CPU 性能模式 (使用通配符适配多核多簇设备)
+for governor in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do
+    [ -f "$governor" ] && echo performance > "$governor" 2>/dev/null
+done
 
 exit 0
 EOF
@@ -129,6 +132,7 @@ chmod +x package/base-files/files/etc/rc.local
 echo "✓ 启动脚本添加完成"
 
 # ==================== 修改banner信息 ====================
+echo " "
 echo "修改banner信息..."
 mkdir -p package/base-files/files/etc
 cat > package/base-files/files/etc/banner << 'EOF'
@@ -146,6 +150,7 @@ EOF
 echo "✓ Banner修改完成"
 
 # ==================== 添加motd信息 ====================
+echo " "
 echo "添加motd信息..."
 mkdir -p package/base-files/files/etc
 cat > package/base-files/files/etc/motd << 'EOF'
@@ -174,20 +179,23 @@ cat > package/base-files/files/etc/motd << 'EOF'
 EOF
 echo "✓ motd添加完成"
 
-# ==================== 修改opkg软件源 ====================
+# ==================== 优化 opkg 软件源为清华源 ====================
+echo " "
 echo "配置opkg软件源..."
-mkdir -p package/base-files/files/etc/opkg
-cat > package/base-files/files/etc/opkg/distfeeds.conf << 'EOF'
-src/gz openwrt_core https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/22.03.5/targets/ipq60xx/generic/packages
-src/gz openwrt_base https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/22.03.5/packages/aarch64_cortex-a53/base
-src/gz openwrt_luci https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/22.03.5/packages/aarch64_cortex-a53/luci
-src/gz openwrt_packages https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/22.03.5/packages/aarch64_cortex-a53/packages
-src/gz openwrt_routing https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/22.03.5/packages/aarch64_cortex-a53/routing
-src/gz openwrt_telephony https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/22.03.5/packages/aarch64_cortex-a53/telephony
+# 使用 uci-defaults 首次启动脚本来替换源，这样绝对兼容任何分支
+mkdir -p package/base-files/files/etc/uci-defaults
+cat > package/base-files/files/etc/uci-defaults/99-custom-repo << 'EOF'
+#!/bin/sh
+# 路由器首次开机时自动替换软件源为清华源
+sed -i 's/downloads.immortalwrt.org/mirrors.tuna.tsinghua.edu.cn\/immortalwrt/g' /etc/opkg/distfeeds.conf 2>/dev/null
+sed -i 's/downloads.openwrt.org/mirrors.tuna.tsinghua.edu.cn\/openwrt/g' /etc/opkg/distfeeds.conf 2>/dev/null
+exit 0
 EOF
-echo "✓ opkg软件源配置完成"
+chmod +x package/base-files/files/etc/uci-defaults/99-custom-repo
+echo "✓ OPKG 软件源配置完成"
 
 # ==================== 优化系统参数 ====================
+echo " "
 echo "优化系统参数..."
 mkdir -p package/base-files/files/etc/sysctl.d
 cat > package/base-files/files/etc/sysctl.d/99-custom.conf << 'EOF'
@@ -219,56 +227,13 @@ vm.dirty_background_ratio = 5
 EOF
 echo "✓ 系统参数优化完成，已添加IPv6支持"
 
-# ==================== 添加自定义防火墙规则 ====================
-echo "添加自定义防火墙规则..."
-mkdir -p package/base-files/files/etc
-cat > package/base-files/files/etc/firewall.user << 'EOF'
-# 自定义防火墙规则
-# 作者: 李杰
-
-# 允许ICMP ping (IPv4)
-iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
-iptables -A OUTPUT -p icmp --icmp-type echo-reply -j ACCEPT
-
-# 允许ICMPv6 (IPv6)
-ip6tables -A INPUT -p icmpv6 -j ACCEPT
-ip6tables -A OUTPUT -p icmpv6 -j ACCEPT
-
-# 允许本地回环 (IPv4)
-iptables -A INPUT -i lo -j ACCEPT
-
-# 允许本地回环 (IPv6)
-ip6tables -A INPUT -i lo -j ACCEPT
-
-# 允许已建立的连接 (IPv4)
-iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-
-# 允许已建立的连接 (IPv6)
-ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-
-# 允许SSH访问 (IPv4)
-iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-
-# 允许SSH访问 (IPv6)
-ip6tables -A INPUT -p tcp --dport 22 -j ACCEPT
-
-# 允许HTTP/HTTPS访问 (IPv4)
-iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-iptables -A INPUT -p tcp --dport 443 -j ACCEPT
-
-# 允许HTTP/HTTPS访问 (IPv6)
-ip6tables -A INPUT -p tcp --dport 80 -j ACCEPT
-ip6tables -A INPUT -p tcp --dport 443 -j ACCEPT
-EOF
-echo "✓ 防火墙规则添加完成，已添加IPv6支持"
-
 # ==================== 处理依赖缺失问题 ====================
+echo " "
 echo "处理依赖缺失问题..."
-# 尝试安装一些可能缺失的依赖包
-echo "尝试安装缺失的依赖包..."
-# 这里可以添加一些具体的依赖包安装命令
+# 此处保留占位，如果有具体依赖包可写在这里
 echo "✓ 依赖处理完成"
 
+echo " "
 echo "============================================"
 echo "DIY Part 2 脚本执行完成"
 echo "============================================"
