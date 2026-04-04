@@ -24,8 +24,10 @@ CONFIG_PACKAGE_kmod-lib-lz4=y
 CONFIG_PACKAGE_firewall4=y
 CONFIG_KERNEL_NETFILTER_XTABLES=y
 CONFIG_KERNEL_NFTABLES=y
+
 # 关键修复：显式禁用 nft-offload，防止与 NSS 冲突死机
 # CONFIG_PACKAGE_kmod-nft-offload is not set
+
 CONFIG_PACKAGE_kmod-nft-core=y
 CONFIG_PACKAGE_kmod-nft-nat=y
 CONFIG_PACKAGE_kmod-nft-tproxy=y
@@ -66,7 +68,7 @@ CONFIG_PACKAGE_kmod-usb3=y
 CONFIG_PACKAGE_kmod-usb-storage=y
 CONFIG_PACKAGE_kmod-usb-storage-uas=y
 
-# USB 网卡与蜂窝网络 
+# USB 网卡与蜂窝网络
 CONFIG_PACKAGE_kmod-usb-net=y
 CONFIG_PACKAGE_kmod-usb-net-rtl8152=y
 CONFIG_PACKAGE_kmod-usb-net-asix-ax88179=y
@@ -85,7 +87,7 @@ CONFIG_PACKAGE_kmod-usb-serial-qualcomm=y
 CONFIG_PACKAGE_kmod-usb-serial-ch341=y
 CONFIG_PACKAGE_kmod-usb-serial-cp210x=y
 
-# ====================== 网络增强与隧道 ======================
+# ====================== 网络增强与隧道 (通用) ======================
 CONFIG_PACKAGE_kmod-bonding=y
 CONFIG_PACKAGE_kmod-dummy=y
 CONFIG_PACKAGE_kmod-gre=y
@@ -147,3 +149,22 @@ CONFIG_PACKAGE_curl=y
 CONFIG_PACKAGE_iwinfo=y
 CONFIG_PACKAGE_nano-full=y
 CONFIG_PACKAGE_openssh-sftp-server=y
+
+# ====================== 完整性与性能工具 ======================
+# 基础网络工具 (Netifd, Swconfig)
+CONFIG_PACKAGE_netifd=y
+CONFIG_PACKAGE_swconfig=y
+CONFIG_PACKAGE_resolveip=y
+CONFIG_PACKAGE_uboot-envtools=y
+
+# 下载与文件处理工具
+CONFIG_PACKAGE_uclient-fetch=y
+CONFIG_PACKAGE_wget-ssl=y
+CONFIG_PACKAGE_mtd=y
+CONFIG_PACKAGE_opkg=y
+
+# 系统工具
+CONFIG_PACKAGE_odhcp6c=y
+CONFIG_PACKAGE_odhcpd-ipv6only=y
+CONFIG_PACKAGE_ppp=y
+CONFIG_PACKAGE_ppp-mod-pppoe=y
