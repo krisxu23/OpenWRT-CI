@@ -1,3 +1,4 @@
+
 # =====================================================================
 # 目标平台与设备 (京东云亚瑟 JD Cloud AX1800 Pro)
 # =====================================================================
@@ -6,7 +7,7 @@ CONFIG_TARGET_qualcommax_ipq60xx=y
 CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-ss-01=y
 
 # =====================================================================
-# 编译环境与架构性能优化 (Cortex-A53 极速指令集)
+# 编译环境与架构性能优化 (Cortex-A53)
 # =====================================================================
 CONFIG_CCACHE=y
 CONFIG_DEVEL=y
@@ -17,14 +18,12 @@ CONFIG_TARGET_OPTIONS=y
 CONFIG_TARGET_OPTIMIZATION="-O2 -pipe -march=armv8-a+crypto+crc -mcpu=cortex-a53+crypto+crc -mtune=cortex-a53"
 
 # =====================================================================
-# 内存与 NSS 硬件加速 (高通专属优化)
+# 内存与 NSS 硬件加速 (1GB + 12.5 版本)
 # =====================================================================
-# (注意: 亚瑟原厂为512MB内存，若已硬改1GB则用1024)
 CONFIG_IPQ_MEM_PROFILE_1024=y
 CONFIG_ATH11K_MEM_PROFILE_1G=y
 CONFIG_NSS_MEM_PROFILE_HIGH=y
 CONFIG_NSS_FIRMWARE_VERSION_12_5=y
-
 # 底层固件与 NSS 驱动支持
 CONFIG_PACKAGE_ath11k-firmware-ipq6018=y
 CONFIG_PACKAGE_ipq-wifi-jdcloud_re-ss-01=y
@@ -36,6 +35,7 @@ CONFIG_PACKAGE_kmod-dsa-qca8k=y
 CONFIG_PACKAGE_kmod-phy-aquantia=y
 CONFIG_PACKAGE_kmod-phy-qca83xx=y
 CONFIG_PACKAGE_kmod-nss-ifb=y
+# NSS 硬件加速相关
 CONFIG_PACKAGE_kmod-qca-nss-crypto=y
 CONFIG_PACKAGE_kmod-qca-nss-dp=y
 CONFIG_PACKAGE_kmod-qca-nss-drv=y
@@ -58,3 +58,6 @@ CONFIG_PACKAGE_kmod-qca-nss-drv-vlan-mgr=y
 CONFIG_PACKAGE_kmod-qca-nss-drv-vxlanmgr=y
 CONFIG_PACKAGE_kmod-qca-nss-drv-wifi-meshmgr=y
 CONFIG_PACKAGE_kmod-qca-nss-ecm=y
+CONFIG_PACKAGE_kmod-ifb=y
+CONFIG_PACKAGE_kmod-sched-cake=y
+CONFIG_PACKAGE_sqm-scripts-nss=y
