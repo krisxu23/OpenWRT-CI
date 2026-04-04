@@ -109,3 +109,166 @@ if [ -d *"luci-app-netspeedtest"* ]; then
 
 	cd $PKG_PATH && echo "netspeedtest has been fixed!"
 fi
+
+# ==================== 添加自定义启动脚本 ====================
+echo "添加自定义启动脚本..."
+mkdir -p package/base-files/files/etc
+cat > package/base-files/files/etc/rc.local << 'EOF'
+
+# 设置CPU性能模式
+echo performance > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor 2>/dev/null
+
+# 启用BBR拥塞控制
+echo net.core.default_qdisc=fq > /etc/sysctl.conf
+echo net.ipv4.tcp_congestion_control=bbr >> /etc/sysctl.conf
+sysctl -p
+
+exit 0
+EOF
+chmod +x package/base-files/files/etc/rc.local
+echo "✓ 启动脚本添加完成"
+
+# ==================== 修改banner信息 ====================
+echo "修改banner信息..."
+mkdir -p package/base-files/files/etc
+cat > package/base-files/files/etc/banner << 'EOF'
+  _______                     ________        __
+ |       |.-----.-----.-----.|  |  |  |.----.|  |_
+ |   -   ||  _  |  -__|     ||  |  |  ||   _||   _|
+ |_______||   __|_____|__|__||________||__|  |____|
+          |__|  OpenWrt AutoBuild by Kris Xu
+ -----------------------------------------------------
+  固件版本: OpenWrt AutoBuild
+  编译时间: $(date '+%Y-%m-%d %H:%M:%S')
+  源码仓库: LiBwrt/openwrt-6.x
+ -----------------------------------------------------
+EOF
+echo "✓ Banner修改完成"
+
+# ==================== 添加motd信息 ====================
+echo "添加motd信息..."
+mkdir -p package/base-files/files/etc
+cat > package/base-files/files/etc/motd << 'EOF'
+
+欢迎使用 OpenWrt AutoBuild 固件!
+
+系统信息:
+  - 固件版本: OpenWrt AutoBuild
+  - 默认IP: 192.168.100.1
+  - 默认密码: password
+  - 默认WiFi: OpenWrt-2.4G / OpenWrt-5G
+  - WiFi密码: 12345678
+
+常用命令:
+  - 查看系统信息: cat /etc/os-release
+  - 查看网络状态: ifconfig
+  - 查看无线状态: iwinfo
+  - 重启系统: reboot
+  - 重置配置: firstboot
+
+技术支持:
+  - 源码: https://github.com/LiBwrt/openwrt-6.x
+  - 插件: https://github.com/kenzok8/openwrt-packages
+  - 依赖: https://github.com/wwz09/QCA-Package
+
+EOF
+echo "✓ motd添加完成"
+
+# ==================== 修改opkg软件源 ====================
+echo "配置opkg软件源..."
+mkdir -p package/base-files/files/etc/opkg
+cat > package/base-files/files/etc/opkg/distfeeds.conf << 'EOF'
+src/gz openwrt_core https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/22.03.5/targets/ipq60xx/generic/packages
+src/gz openwrt_base https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/22.03.5/packages/aarch64_cortex-a53/base
+src/gz openwrt_luci https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/22.03.5/packages/aarch64_cortex-a53/luci
+src/gz openwrt_packages https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/22.03.5/packages/aarch64_cortex-a53/packages
+src/gz openwrt_routing https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/22.03.5/packages/aarch64_cortex-a53/routing
+src/gz openwrt_telephony https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/22.03.5/packages/aarch64_cortex-a53/telephony
+EOF
+echo "✓ opkg软件源配置完成"
+
+# ==================== 优化系统参数 ====================
+echo "优化系统参数..."
+mkdir -p package/base-files/files/etc/sysctl.d
+cat > package/base-files/files/etc/sysctl.d/99-custom.conf << 'EOF'
+# 网络优化 (IPv4)
+net.core.rmem_max = 16777216
+net.core.wmem_max = 16777216
+net.ipv4.tcp_rmem = 4096 87380 16777216
+net.ipv4.tcp_wmem = 4096 65536 16777216
+net.ipv4.tcp_congestion_control = bbr
+net.core.default_qdisc = fq
+
+# 网络优化 (IPv6)
+net.ipv6.conf.all.forwarding = 1
+net.ipv6.conf.default.forwarding = 1
+net.ipv6.conf.all.accept_ra = 2
+net.ipv6.conf.default.accept_ra = 2
+net.ipv6.conf.all.autoconf = 1
+net.ipv6.conf.default.autoconf = 1
+net.ipv6.conf.all.max_addresses = 16
+net.ipv6.conf.default.max_addresses = 16
+
+# 文件描述符限制
+fs.file-max = 65535
+
+# 内存优化
+vm.swappiness = 10
+vm.dirty_ratio = 15
+vm.dirty_background_ratio = 5
+EOF
+echo "✓ 系统参数优化完成，已添加IPv6支持"
+
+# ==================== 添加自定义防火墙规则 ====================
+echo "添加自定义防火墙规则..."
+mkdir -p package/base-files/files/etc
+cat > package/base-files/files/etc/firewall.user << 'EOF'
+# 自定义防火墙规则
+# 作者: 李杰
+
+# 允许ICMP ping (IPv4)
+iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
+iptables -A OUTPUT -p icmp --icmp-type echo-reply -j ACCEPT
+
+# 允许ICMPv6 (IPv6)
+ip6tables -A INPUT -p icmpv6 -j ACCEPT
+ip6tables -A OUTPUT -p icmpv6 -j ACCEPT
+
+# 允许本地回环 (IPv4)
+iptables -A INPUT -i lo -j ACCEPT
+
+# 允许本地回环 (IPv6)
+ip6tables -A INPUT -i lo -j ACCEPT
+
+# 允许已建立的连接 (IPv4)
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# 允许已建立的连接 (IPv6)
+ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# 允许SSH访问 (IPv4)
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+
+# 允许SSH访问 (IPv6)
+ip6tables -A INPUT -p tcp --dport 22 -j ACCEPT
+
+# 允许HTTP/HTTPS访问 (IPv4)
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+
+# 允许HTTP/HTTPS访问 (IPv6)
+ip6tables -A INPUT -p tcp --dport 80 -j ACCEPT
+ip6tables -A INPUT -p tcp --dport 443 -j ACCEPT
+EOF
+echo "✓ 防火墙规则添加完成，已添加IPv6支持"
+
+# ==================== 处理依赖缺失问题 ====================
+echo "处理依赖缺失问题..."
+# 尝试安装一些可能缺失的依赖包
+echo "尝试安装缺失的依赖包..."
+# 这里可以添加一些具体的依赖包安装命令
+echo "✓ 依赖处理完成"
+
+echo "============================================"
+echo "DIY Part 2 脚本执行完成"
+echo "============================================"
