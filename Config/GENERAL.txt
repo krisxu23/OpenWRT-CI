@@ -415,3 +415,9 @@ CONFIG_PACKAGE_luci-app-filetransfer=y
 # =====================================================================
 CONFIG_KERNEL_BUILD_USER="OpenWrt"
 CONFIG_KERNEL_BUILD_DOMAIN="OpenWrt"
+
+# 临时添加
+CONFIG_PACKAGE_python3-email=y
+CONFIG_PACKAGE_python3-pkg-resources=y
+CONFIG_PACKAGE_kmod-mhi-wwan=y
+CONFIG_PACKAGE_quectel-CM-5G=y
