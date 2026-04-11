@@ -374,7 +374,7 @@ CONFIG_SAMBA4_SERVER_VFS=y
 # ---------------------------------------------------------------------
 CONFIG_PACKAGE_luci-app-homeproxy=y
 CONFIG_PACKAGE_luci-app-openclash=y
-CONFIG_PACKAGE_luci-app-passwall=y
+CONFIG_PACKAGE_luci-app-passwall2=y
 # ---------------------------------------------------------------------
 # DNS 类
 # ---------------------------------------------------------------------
