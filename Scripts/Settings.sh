@@ -64,3 +64,6 @@ if [[ "${WRT_TARGET^^}" == *"QUALCOMMAX"* ]]; then
 	#其他调整
 	echo "CONFIG_PACKAGE_kmod-usb-serial-qualcomm=y" >> ./.config
 fi
+
+# 调用自定义的 USB 自动化配置脚本
+bash ./Scripts/AutoUSB.sh
