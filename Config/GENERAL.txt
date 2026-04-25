@@ -21,7 +21,6 @@ CONFIG_PACKAGE_kmod-zram=y
 CONFIG_KERNEL_ZRAM_BACKEND_LZ4=y
 CONFIG_KERNEL_ZRAM_BACKEND_LZO=y
 CONFIG_KERNEL_ZRAM_DEF_COMP_LZ4=y
-CONFIG_KERNEL_ZRAM_DEF_COMP_LZORLE=y
 
 # ---------------------------------------------------------------------
 # BusyBox 定制
@@ -47,7 +46,6 @@ CONFIG_PACKAGE_kmod-nls-iso8859-1=y
 CONFIG_PACKAGE_kmod-nls-utf8=y
 
 # 文件系统工具
-CONFIG_PACKAGE_ntfs-3g=y
 CONFIG_PACKAGE_exfat-fsck=y
 CONFIG_PACKAGE_exfat-mkfs=y
 
@@ -67,9 +65,6 @@ CONFIG_PACKAGE_kmod-usb2-pci=y
 CONFIG_PACKAGE_kmod-usb-storage=y
 CONFIG_PACKAGE_kmod-usb-storage-extras=y
 CONFIG_PACKAGE_kmod-usb-storage-uas=y
-
-# USB音频
-CONFIG_PACKAGE_kmod-usb-audio=y
 
 # USB串口/ACM
 CONFIG_PACKAGE_kmod-usb-acm=y
@@ -214,7 +209,6 @@ CONFIG_PACKAGE_hdparm=y
 CONFIG_PACKAGE_blkid=y
 CONFIG_PACKAGE_lsblk=y
 CONFIG_PACKAGE_smartmontools-drivedb=y
-CONFIG_PACKAGE_usbutils=y
 CONFIG_PACKAGE_mii-tool=y
 CONFIG_PACKAGE_qrencode=y
 CONFIG_PACKAGE_xz-utils=y
@@ -409,9 +403,3 @@ CONFIG_PACKAGE_luci-app-filetransfer=y
 # =====================================================================
 CONFIG_KERNEL_BUILD_USER="OpenWrt"
 CONFIG_KERNEL_BUILD_DOMAIN="OpenWrt"
-
-# 临时添加
-CONFIG_PACKAGE_python3-email=y
-CONFIG_PACKAGE_python3-pkg-resources=y
-CONFIG_PACKAGE_kmod-mhi-wwan=y
-CONFIG_PACKAGE_quectel-CM-5G=y
