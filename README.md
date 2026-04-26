@@ -1,42 +1,41 @@
-# OpenWRT-CI
+# VIKINGYFY OpenWrt 固件 - jdcloud_re-ss-01
 
-官方版：
+本固件基于 OpenWrt 编译，针对 **IPQ60XX jdcloud_re-ss-01** 设备优化，功能完整，适合中国大陆用户。
 
-https://github.com/immortalwrt/immortalwrt.git
+## 目标设备
+- Qualcomm IPQ60XX 平台
+- 设备型号：jdcloud_re-ss-01
+- 内存配置：1GB
 
-高通版：
+## 核心功能
+- **网络与加速**
+  - NSS 驱动全功能启用（L2TP、PPTP、VXLAN、IGS、Shaper 等）
+  - Ath11k Wi-Fi 驱动，支持 Mesh 网络
+  - 支持 MPTCP、nftables、透明代理与多种隧道
 
-https://github.com/VIKINGYFY/immortalwrt.git
+- **USB 与存储**
+  - USB 2/3 全系列驱动
+  - 支持大部分 4G/5G 网卡
+  - 支持 BTRFS/F2FS/NTFS3/exFAT/VFAT/XFS 等文件系统
+  - 支持 U盘、移动硬盘、USB Modem
 
-# U-BOOT
+- **系统与工具**
+  - LuCI Web 界面（argon、bootstrap 主题）
+  - 常用网络与系统工具：htop、btop、tmux、iperf3、tcpdump、curl、openssh
+  - 支持 ZRAM 压缩交换
+  - 支持 sing-box、xray-core、OpenClash 等代理工具
+  - DNS/网络优化工具：chinadns-ng、dns2socks、dns2tcp
 
-高通版：
+- **语言与本地化**
+  - 默认中文界面
+  - 支持繁体和简体中文语言包
+  - 默认时区：中国标准时间（UTC+8）
 
-https://github.com/chenxin527/uboot-ipq60xx-emmc-build
+## 编译优化
+- CPU 指令优化：`-O3 -march=armv8-a+crypto+crc -mcpu=cortex-a53`
+- 内存 1GB 设备优化配置
+- Skb recycler 多 CPU 支持
 
-https://github.com/chenxin527/uboot-ipq60xx-nand-build
+---
 
-https://github.com/chenxin527/uboot-ipq60xx-nor-build
-
-联发科版：
-
-https://drive.wrt.moe/uboot/mediatek
-
-# 固件简要说明
-
-固件每天早上4点自动编译。
-
-固件信息里的时间为编译开始的时间，方便核对上游源码提交时间。
-
-MEDIATEK系列、QUALCOMMAX系列、ROCKCHIP系列、X86系列。
-
-# 目录简要说明
-
-workflows——自定义CI配置
-
-Scripts——自定义脚本
-
-Config——自定义配置
-
-#
-[![Stargazers over time](https://starchart.cc/VIKINGYFY/OpenWRT-CI.svg?variant=adaptive)](https://starchart.cc/VIKINGYFY/OpenWRT-CI)
+**注意**：本固件为定制固件，包含多种高级功能和驱动，如果不需要所有功能，可根据实际需求裁剪部分模块以减小固件体积。
