@@ -1,4 +1,4 @@
-# VIKINGYFY OpenWrt 固件 - jdcloud_re-ss-01
+# jdcloud_re-ss-01 OpenWrt 固件
 
 本固件基于 OpenWrt 编译，针对 **IPQ60XX jdcloud_re-ss-01** 设备优化，功能完整，适合中国大陆用户。
 
@@ -23,13 +23,7 @@
   - LuCI Web 界面（argon、bootstrap 主题）
   - 常用网络与系统工具：htop、btop、tmux、iperf3、tcpdump、curl、openssh
   - 支持 ZRAM 压缩交换
-  - 支持 sing-box、xray-core、OpenClash 等代理工具
-  - DNS/网络优化工具：chinadns-ng、dns2socks、dns2tcp
-
-- **语言与本地化**
-  - 默认中文界面
-  - 支持繁体和简体中文语言包
-  - 默认时区：中国标准时间（UTC+8）
+  - 支持 homeproxy、OpenClash 等代理工具
 
 ## 编译优化
 - CPU 指令优化：`-O3 -march=armv8-a+crypto+crc -mcpu=cortex-a53`
