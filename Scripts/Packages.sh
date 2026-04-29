@@ -76,10 +76,6 @@ UPDATE_PACKAGE "qmodem" "FUjr/QModem" "main"
 UPDATE_PACKAGE "quickfile" "sbwml/luci-app-quickfile" "main"
 UPDATE_PACKAGE "viking" "VIKINGYFY/packages" "main" "" "luci-app-timewol luci-app-wolplus"
 UPDATE_PACKAGE "vnt" "lmq8267/luci-app-vnt" "main"
-# 提取 TurboACC 相关的全套源码
-UPDATE_PACKAGE "luci-app-turboacc" "kenzok8/jell" "main" "pkg" "luci-app-turboacc"
-UPDATE_PACKAGE "shortcut-fe" "kenzok8/jell" "main" "pkg" "shortcut-fe"
-UPDATE_PACKAGE "pdnsd-alt" "kenzok8/jell" "main" "pkg" "pdnsd-alt"
 
 #更新软件包版本
 UPDATE_VERSION() {
