@@ -42,10 +42,6 @@ CONFIG_PACKAGE_kmod-aic8800-pcie=n
 CONFIG_PACKAGE_kmod-aic8800-sdio=n
 CONFIG_PACKAGE_kmod-aic8800-usb=n
 CONFIG_PACKAGE_kmod-qca-nss-drv-netlink=n
-# 禁用软件加速（和 NSS 冲突）
-CONFIG_PACKAGE_shortcut-fe=n
-CONFIG_PACKAGE_kmod-nft-fullcone=n
-CONFIG_PACKAGE_luci-app-turboacc=n
 
 # ==========================================
 # 核心网络 / DNS / 无线安全
