@@ -176,11 +176,7 @@ jobs:
 
           make defconfig -j$(nproc) && make clean -j$(nproc)
 
-      - name: Patch jdcloud 2GB rootfs
-        run: |
-          cd ./wrt/
-          sed -i '/define Device\/jdcloud_re-ss-01/,/endef/{s/IMAGE_SIZE := 28416k/IMAGE_SIZE := 2097152k/; s/pad-to 28416k/pad-to 2097152k/}' target/linux/qualcommax/image/ipq60xx.mk    
-
+      
       - name: Download Packages
         if: env.WRT_TEST != 'true'
         run: |
