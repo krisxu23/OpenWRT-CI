@@ -1,5 +1,5 @@
 # ==========================================
-# 平台与硬件适配
+# 平台与硬件适配 (京东云亚瑟 RE-SS-01 整合)
 # ==========================================
 CONFIG_TARGET_qualcommax=y
 CONFIG_TARGET_qualcommax_ipq60xx=y
@@ -14,25 +14,33 @@ CONFIG_KERNEL_IPQ_MEM_PROFILE=1024
 CONFIG_ATH11K_MEM_PROFILE_1G=y
 CONFIG_NSS_MEM_PROFILE_HIGH=y
 
-# NSS 核心驱动与固件
+# ==========================================
+# 高通 NSS 硬件加速引擎
+# ==========================================
 CONFIG_NSS_FIRMWARE_VERSION_12_5=y
-CONFIG_PACKAGE_nss-firmware=y
+CONFIG_PACKAGE_nss-firmware-ipq60xx=y
 CONFIG_PACKAGE_kmod-qca-nss-drv=y
-CONFIG_PACKAGE_kmod-qca-nss-drv-netlink=y
+CONFIG_PACKAGE_kmod-qca-nss-dp=y
 CONFIG_PACKAGE_kmod-qca-nss-ecm=y
 CONFIG_PACKAGE_kmod-qca-nss-ecm-ipv6=y
+CONFIG_PACKAGE_kmod-qca-nss-gmac=y
+CONFIG_PACKAGE_kmod-ppp=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-pppoe=y
+CONFIG_PACKAGE_kmod-qca-nss-crypto=y
+CONFIG_PACKAGE_kmod-qca-nss-drv-netlink=y
 
-# 数据包回收加速
+# ==========================================
+# 性能优化 (CPU 调度 / TCP / 多核网络)
+# ==========================================
 CONFIG_KERNEL_SKB_RECYCLER=y
 CONFIG_KERNEL_SKB_RECYCLER_MULTI_CPU=y
 
-# ⚡ 性能优化（CPU 调度 + TCP + 多核网络）
 CONFIG_CPU_FREQ_GOV_SCHEDUTIL=y
 CONFIG_CPU_FREQ_DEFAULT_GOV_SCHEDUTIL=y
 
+CONFIG_PACKAGE_kmod-tcp-bbr=y
 CONFIG_TCP_CONG_BBR=y
 CONFIG_DEFAULT_TCP_CONG="bbr"
 CONFIG_NET_SCH_FQ=y
-
 CONFIG_RPS=y
 CONFIG_RFS_ACCEL=y
