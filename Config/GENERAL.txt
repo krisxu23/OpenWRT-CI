@@ -1,6 +1,7 @@
 # ==========================================
-# 基础参数
+# 基础参数 
 # ==========================================
+CONFIG_PACKAGE_autocore=y
 CONFIG_CCACHE=y
 CONFIG_DEVEL=y
 CONFIG_FEED_video=n
@@ -9,15 +10,15 @@ CONFIG_TARGET_PER_DEVICE_ROOTFS=y
 CONFIG_TARGET_ROOTFS_INITRAMFS=n
 
 # ==========================================
-# 核心网络 / DNS / 无线安全
+# 核心网络 / DNS / 无线安全 
 # ==========================================
 CONFIG_PACKAGE_dnsmasq-full=y
 CONFIG_PACKAGE_dnsmasq_full_dhcpv6=y
 CONFIG_PACKAGE_dnsmasq_full_nftset=y
 CONFIG_PACKAGE_dnsmasq_full_conntrack=y
+CONFIG_PACKAGE_dnsmasq_full_dnssec=y
 CONFIG_PACKAGE_dnsmasq_full_dhcp=y
 CONFIG_PACKAGE_dnsmasq_full_auth=y
-CONFIG_PACKAGE_dnsmasq_full_dnssec=y
 CONFIG_PACKAGE_dnsmasq_full_ipset=y
 CONFIG_PACKAGE_dnsmasq_full_noid=y
 CONFIG_PACKAGE_dnsmasq_full_tftp=y
@@ -32,17 +33,12 @@ CONFIG_PACKAGE_odhcp6c=y
 CONFIG_PACKAGE_odhcpd-ipv6only=y
 
 # ==========================================
-# 内核模块 / Nftables 协议栈
+# 防火墙 / 透明代理 / Nftables
 # ==========================================
-# 基础隧道与虚拟化
-CONFIG_PACKAGE_kmod-tun=y
-CONFIG_PACKAGE_kmod-veth=y
-CONFIG_PACKAGE_kmod-wireguard=y
-CONFIG_PACKAGE_kmod-dummy=y
-CONFIG_PACKAGE_kmod-macvlan=y
-CONFIG_PACKAGE_kmod-vxlan=y
+CONFIG_PACKAGE_firewall4=y
+CONFIG_PACKAGE_miniupnpd-nftables=y
 
-# Nftables 核心及扩展（全部启用，仅 offload 因 NSS 冲突禁用）
+# Nftables 全扩展 
 CONFIG_PACKAGE_kmod-nft-core=y
 CONFIG_PACKAGE_kmod-nft-arp=y
 CONFIG_PACKAGE_kmod-nft-bridge=y
@@ -52,29 +48,43 @@ CONFIG_PACKAGE_kmod-nft-fib=y
 CONFIG_PACKAGE_kmod-nft-fullcone=y
 CONFIG_PACKAGE_kmod-nft-nat=y
 CONFIG_PACKAGE_kmod-nft-netdev=y
-# CONFIG_PACKAGE_kmod-nft-offload is not set     # 必须禁用，NSS 冲突
+# CONFIG_PACKAGE_kmod-nft-offload is not set   # 与 NSS 冲突，必须禁用
 CONFIG_PACKAGE_kmod-nft-queue=y
 CONFIG_PACKAGE_kmod-nft-socket=y
 CONFIG_PACKAGE_kmod-nft-tproxy=y
 CONFIG_PACKAGE_kmod-nft-xfrm=y
 
+# 防火墙增强模块 (透明代理必备)
+CONFIG_PACKAGE_kmod-nf-socket=y
+CONFIG_PACKAGE_kmod-nf-tproxy=y
+CONFIG_PACKAGE_kmod-nf-conntrack-netlink=y
+CONFIG_PACKAGE_kmod-nat46=y
+
 # QoS 调度
 CONFIG_PACKAGE_kmod-sched-cake=y
 CONFIG_PACKAGE_kmod-sched-core=y
 
-# 防火墙与兼容层（纯 nftables）
-CONFIG_PACKAGE_kmod-nf-socket=y
-CONFIG_PACKAGE_kmod-nf-tproxy=y
-CONFIG_PACKAGE_kmod-nf-conntrack-netlink=y
-CONFIG_PACKAGE_firewall4=y
-CONFIG_PACKAGE_miniupnpd-nftables=y
-# IPv6/IPv4 互通增强
-CONFIG_PACKAGE_kmod-nat46=y
+# ==========================================
+# 内核模块与虚拟网络 
+# ==========================================
+CONFIG_PACKAGE_kmod-tun=y
+CONFIG_PACKAGE_kmod-wireguard=y
+CONFIG_PACKAGE_kmod-bonding=y
+CONFIG_PACKAGE_kmod-veth=y
+CONFIG_PACKAGE_kmod-dummy=y
+CONFIG_PACKAGE_kmod-macvlan=y
+CONFIG_PACKAGE_kmod-vxlan=y
+
+# 其他内核模块
+CONFIG_PACKAGE_kmod-mtd-rw=y
+CONFIG_PACKAGE_kmod-inet-diag=y
+CONFIG_PACKAGE_kmod-netlink-diag=y
+CONFIG_PACKAGE_kmod-inet-mptcp-diag=y
 
 # ==========================================
 # USB 驱动组 
 # ==========================================
-# 主机控制器（仅保留 IPQ60xx 实际使用的 DWC3/XHCI）
+# 主机控制器 - 高通 DWC3/XHCI 专属
 CONFIG_PACKAGE_kmod-usb-core=y
 CONFIG_PACKAGE_kmod-usb-dwc3=y
 CONFIG_PACKAGE_kmod-usb-dwc3-qcom=y
@@ -86,13 +96,13 @@ CONFIG_PACKAGE_kmod-usb-storage=y
 CONFIG_PACKAGE_kmod-usb-storage-uas=y
 CONFIG_PACKAGE_kmod-usb-storage-extras=y
 
-# USB 网络共享驱动（全覆盖）
+# USB 网络共享驱动 
 CONFIG_PACKAGE_kmod-usb-net=y
 CONFIG_PACKAGE_kmod-usb-net-cdc-ether=y
 CONFIG_PACKAGE_kmod-usb-net-cdc-ncm=y
 CONFIG_PACKAGE_kmod-usb-net-huawei-cdc-ncm=y
 CONFIG_PACKAGE_kmod-usb-net-rndis=y
-CONFIG_PACKAGE_kmod-usb-net-rndis-host=y
+CONFIG_PACKAGE_kmod-usb-net-rndis-host=y      
 CONFIG_PACKAGE_kmod-usb-net-asix=y
 CONFIG_PACKAGE_kmod-usb-net-asix-ax88179=y
 CONFIG_PACKAGE_kmod-usb-net-rtl8152=y
@@ -104,13 +114,14 @@ CONFIG_PACKAGE_kmod-usb-net-smsc95xx=y
 CONFIG_PACKAGE_kmod-usb-net-lan78xx=y
 CONFIG_PACKAGE_kmod-usb-net-mcs7830=y
 CONFIG_PACKAGE_kmod-usb-net-pegasus=y
-CONFIG_PACKAGE_kmod-usb-net-kalmia=y
+CONFIG_PACKAGE_kmod-usb-net-kalmia=y         
 CONFIG_PACKAGE_kmod-usb-net-sr9700=y
 CONFIG_PACKAGE_kmod-usb-net-cx82310=y
-# 4G/5G 模块（CDC MBIM / QMI）
+CONFIG_PACKAGE_kmod-usb-net-sierrawireless=y   
+# 4G/5G 模块
 CONFIG_PACKAGE_kmod-usb-net-cdc-mbim=y
 CONFIG_PACKAGE_kmod-usb-net-qmi-wwan=y
-# 串口/AT 端口
+# 串口
 CONFIG_PACKAGE_kmod-usb-serial=y
 CONFIG_PACKAGE_kmod-usb-serial-option=y
 CONFIG_PACKAGE_kmod-usb-serial-wwan=y
@@ -119,9 +130,9 @@ CONFIG_PACKAGE_kmod-usb-serial-wwan=y
 CONFIG_PACKAGE_usb-modeswitch=y
 CONFIG_PACKAGE_usbreset=y
 CONFIG_PACKAGE_usbutils=y
-CONFIG_PACKAGE_udev=y
+CONFIG_PACKAGE_udev=y                     
 
-# iPhone USB 共享全套支持
+# iPhone USB 共享全套
 CONFIG_PACKAGE_usbmuxd=y
 CONFIG_PACKAGE_libimobiledevice=y
 CONFIG_PACKAGE_libusbmuxd=y
@@ -132,8 +143,11 @@ CONFIG_PACKAGE_libplist=y
 # ==========================================
 # 内核模块
 CONFIG_PACKAGE_kmod-fs-ext4=y
+CONFIG_PACKAGE_kmod-fs-f2fs=y
 CONFIG_PACKAGE_kmod-fs-vfat=y
 CONFIG_PACKAGE_kmod-fs-exfat=y
+CONFIG_PACKAGE_kmod-fs-btrfs=y
+CONFIG_PACKAGE_kmod-fs-xfs=y
 CONFIG_PACKAGE_kmod-fs-ntfs3=y
 CONFIG_PACKAGE_kmod-fuse=y
 CONFIG_PACKAGE_kmod-nls-cp437=y
@@ -144,59 +158,101 @@ CONFIG_PACKAGE_kmod-nls-utf8=y
 CONFIG_PACKAGE_e2fsprogs=y
 CONFIG_PACKAGE_f2fs-tools=y
 CONFIG_PACKAGE_parted=y
+CONFIG_PACKAGE_gdisk=y
+CONFIG_PACKAGE_cfdisk=y
+CONFIG_PACKAGE_fdisk=y
+CONFIG_PACKAGE_blkid=y
+CONFIG_PACKAGE_lsblk=y
+CONFIG_PACKAGE_exfat-mkfs=y
+CONFIG_PACKAGE_exfat-fsck=y
 CONFIG_PACKAGE_ntfs3-mount=y
 CONFIG_PACKAGE_fstrim=y
 CONFIG_PACKAGE_resize2fs=y
 CONFIG_PACKAGE_losetup=y
 CONFIG_PACKAGE_fuse-utils=y
-CONFIG_PACKAGE_gdisk=y
-CONFIG_PACKAGE_fdisk=y
-CONFIG_PACKAGE_blkid=y
-CONFIG_PACKAGE_lsblk=y
-
-# 自动挂载
 CONFIG_PACKAGE_block-mount=y
 CONFIG_PACKAGE_blockd=y
 CONFIG_PACKAGE_automount=y
+CONFIG_PACKAGE_btrfs-progs=y
+
+# 加密加速
+CONFIG_PACKAGE_kmod-crypto-aes=y
+CONFIG_PACKAGE_kmod-crypto-sha256=y
+CONFIG_PACKAGE_kmod-crypto-sha512=y
 
 # ==========================================
 # 系统工具
 # ==========================================
-CONFIG_PACKAGE_autocore=y
+CONFIG_PACKAGE_coremark=y
 CONFIG_PACKAGE_cpufreq=y
 CONFIG_PACKAGE_curl=y
 CONFIG_PACKAGE_htop=y
+CONFIG_PACKAGE_nano=y
+CONFIG_PACKAGE_bash=y
+CONFIG_PACKAGE_perl=y
 CONFIG_PACKAGE_iperf3=y
+CONFIG_PACKAGE_smartmontools=y
+CONFIG_PACKAGE_smartmontools-drivedb=y
+CONFIG_PACKAGE_etherwake=y
+CONFIG_PACKAGE_zram-swap=y
+CONFIG_PACKAGE_dmesg=y
 CONFIG_PACKAGE_ip-full=y
 CONFIG_PACKAGE_ethtool=y
 CONFIG_PACKAGE_mtr=y
 CONFIG_PACKAGE_tcpdump=y
-CONFIG_PACKAGE_nano=y
-CONFIG_PACKAGE_openssh-keygen=y
-CONFIG_PACKAGE_openssh-sftp-server=y
-CONFIG_PACKAGE_openssl-util=y
-CONFIG_PACKAGE_ca-certificates=y
 CONFIG_PACKAGE_irqbalance=y
 CONFIG_PACKAGE_unzip=y
 CONFIG_PACKAGE_xz-utils=y
+CONFIG_PACKAGE_ca-certificates=y
 CONFIG_PACKAGE_proto-bonding=y
 
+# SSH / SSL
+CONFIG_PACKAGE_openssh-sftp-server=y
+CONFIG_PACKAGE_openssh-keygen=y
+CONFIG_PACKAGE_openssl-util=y
+CONFIG_OPENSSL_WITH_CHACHA_POLY1305=y
+CONFIG_OPENSSL_WITH_TLS13=y
+CONFIG_PACKAGE_libopenssl-conf=y
+
 # ==========================================
-# LuCI 应用 
+# 压缩工具
 # ==========================================
-CONFIG_PACKAGE_luci-app-firewall=y
-CONFIG_PACKAGE_luci-app-openclash=y
-CONFIG_PACKAGE_luci-app-homeproxy=y
-CONFIG_PACKAGE_luci-app-mosdns=y
-CONFIG_PACKAGE_luci-app-ttyd=y
-CONFIG_PACKAGE_luci-app-samba4=y
-CONFIG_PACKAGE_luci-app-package-manager=y
-CONFIG_PACKAGE_luci-app-filemanager=y
-CONFIG_PACKAGE_luci-app-diskman=y
-CONFIG_PACKAGE_luci-app-cpufreq=y
-CONFIG_PACKAGE_luci-app-autoreboot=y
+CONFIG_PACKAGE_p7zip=y
+CONFIG_PACKAGE_unrar=y
+CONFIG_PACKAGE_zip=y
+CONFIG_PACKAGE_unzip=y
+CONFIG_PACKAGE_xz=y
+CONFIG_PACKAGE_zstd=y
+CONFIG_PACKAGE_bzip2=y
+
+# ==========================================
+# LuCI 界面与协议
+# ==========================================
+# 主题与中文
+CONFIG_PACKAGE_luci-theme-argon=y
 CONFIG_PACKAGE_luci-app-argon-config=y
-CONFIG_PACKAGE_luci-app-ramfree=y       
+CONFIG_LUCI_LANG_zh_cn=y
+CONFIG_PACKAGE_luci-i18n-base-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-argon-config-zh-cn=y
+CONFIG_PACKAGE_default-settings-chn=y
+
+# 应用
+CONFIG_PACKAGE_luci-app-diskman=y
+CONFIG_PACKAGE_luci-app-mini-diskmanager=y
+CONFIG_PACKAGE_luci-app-partexp=y
+CONFIG_PACKAGE_luci-app-filemanager=y
+CONFIG_PACKAGE_luci-app-cpufreq=y
+CONFIG_PACKAGE_luci-app-cpulimit=y
+CONFIG_PACKAGE_luci-app-ramfree=y
+CONFIG_PACKAGE_luci-app-ttyd=y
+CONFIG_PACKAGE_luci-app-firewall=y
+CONFIG_PACKAGE_luci-app-package-manager=y
+CONFIG_PACKAGE_luci-app-samba4=y
+CONFIG_PACKAGE_luci-app-wolplus=y
+CONFIG_PACKAGE_luci-app-autoreboot=y
+CONFIG_PACKAGE_luci-app-mosdns=y
+CONFIG_PACKAGE_luci-app-homeproxy=y
+CONFIG_PACKAGE_luci-app-openclash=y
 
 # LuCI 协议
 CONFIG_PACKAGE_luci-proto-relay=y
@@ -204,38 +260,16 @@ CONFIG_PACKAGE_luci-proto-wireguard=y
 CONFIG_PACKAGE_luci-proto-ipv6=y
 CONFIG_PACKAGE_luci-proto-ppp=y
 
-# 主题与中文本地化
-CONFIG_LUCI_LANG_zh_cn=y
-CONFIG_PACKAGE_luci-i18n-base-zh-cn=y
-CONFIG_PACKAGE_luci-theme-argon=y
-CONFIG_PACKAGE_luci-i18n-argon-config-zh-cn=y
-CONFIG_PACKAGE_default-settings-chn=y
-
 # ==========================================
-# ZRAM / Swap（LZ4 默认）
+# ZRAM / Swap (LZ4)
 # ==========================================
 CONFIG_PACKAGE_zram-swap=y
 CONFIG_PACKAGE_kmod-zram=y
 CONFIG_KERNEL_ZRAM_DEF_COMP_LZ4=y
 
 # ==========================================
-# OpenSSL
-# ==========================================
-CONFIG_OPENSSL_WITH_CHACHA_POLY1305=y
-CONFIG_OPENSSL_WITH_TLS13=y
-CONFIG_PACKAGE_libopenssl-conf=y
-
-# ==========================================
-# 默认系统组件
+# 其他核心组件
 # ==========================================
 CONFIG_PACKAGE_kmod-tcp-bbr=y
-CONFIG_PACKAGE_uhttpd=y
-CONFIG_PACKAGE_rpcd=y
-CONFIG_PACKAGE_rpcd-mod-file=y
-CONFIG_PACKAGE_rpcd-mod-iwinfo=y
-CONFIG_PACKAGE_rpcd-mod-luci=y
-CONFIG_PACKAGE_rpcd-mod-rrdns=y
-CONFIG_PACKAGE_rpcd-mod-ucode=y
-CONFIG_PACKAGE_uhttpd-mod-ubus=y
 CONFIG_PACKAGE_uboot-envtools=y
 CONFIG_PACKAGE_mtd=y
