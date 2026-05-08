@@ -74,3 +74,7 @@ if [[ "${WRT_TARGET^^}" == *"QUALCOMMAX"* ]]; then
 		echo "qualcommax set up nowifi successfully!"
 	fi
 fi
+
+# 调用自定义的 USB 自动化配置脚本
+# 使用 $(dirname "$0") 获取 Settings.sh 所在的绝对路径，确保能找到同目录下的 AutoUSB.sh
+bash "$(dirname "$0")/AutoUSB.sh"
