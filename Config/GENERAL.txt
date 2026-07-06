@@ -157,3 +157,42 @@ CONFIG_PACKAGE_kmod-usb-xhci=y            # XHCI USB 3.0 控制器
 CONFIG_PACKAGE_kmod-usb3=y                # USB 3.0 支持
 CONFIG_PACKAGE_kmod-veth=y                # 虚拟以太网对（容器用）
 CONFIG_PACKAGE_kmod-wireguard=y           # WireGuard VPN 内核模块
+
+# Docker 守护进程与命令行工具
+CONFIG_PACKAGE_dockerd=y
+CONFIG_PACKAGE_docker=y
+# 容器运行时与compose编排工具
+CONFIG_PACKAGE_containerd=y
+CONFIG_PACKAGE_docker-compose=y
+# 容器进程init转发工具（防止僵尸进程）
+CONFIG_PACKAGE_tini=y
+	# Docker 管理面板与依赖库
+CONFIG_PACKAGE_luci-app-dockerman=y
+CONFIG_PACKAGE_luci-lib-docker=y
+	# Cgroups 资源限制与隔离支持
+CONFIG_PACKAGE_kmod-cgroup=y
+CONFIG_PACKAGE_kmod-cgroup-net_cls=y
+CONFIG_PACKAGE_kmod-cgroup-net-prio=y
+ 
+# OverlayFS 与 Ext4 文件系统支持（Docker存储驱动必需）
+CONFIG_PACKAGE_kmod-fs-overlay=y
+CONFIG_PACKAGE_kmod-fs-ext4=y
+ 
+# 网桥与防火墙联动支持
+CONFIG_PACKAGE_kmod-br-netfilter=y
+CONFIG_PACKAGE_kmod-ipt-physdev=y
+	# nftables 兼容的 iptables 命令行工具
+CONFIG_PACKAGE_iptables-nft=y
+CONFIG_PACKAGE_ip6tables-nft=y
+ 
+# 传统 iptables 兼容（部分旧版 Docker 组件可能依赖）
+CONFIG_PACKAGE_iptables=y
+CONFIG_PACKAGE_ip6tables=y
+CONFIG_PACKAGE_kmod-ipt-nat=y
+CONFIG_PACKAGE_kmod-ipt-extra=y
+	# 自动挂载 cgroup 文件系统（避免手动配置）
+CONFIG_PACKAGE_cgroupfs-mount=y
+ 
+# 解决容器内挂载宿主机目录时中文字符乱码问题
+CONFIG_PACKAGE_kmod-nls-cp437=y
+CONFIG_PACKAGE_kmod-nls-iso8859-1=y
