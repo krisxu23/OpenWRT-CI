@@ -1,90 +1,142 @@
-#!/bin/bash
-# =====================================================================
-# 脚本：AutoUSB.sh 
-# 适用：全自动处理 USB 随身WiFi 插拔
-# 特点：快速插拔保护、物理设备校验、静默清理
-# =====================================================================
-
-echo " "
-echo ">>> 正在注入 USB 自动化脚本..."
-
-DEST_DIR="./package/base-files/files/etc/hotplug.d/net"
-mkdir -p "$DEST_DIR"
-
-cat <<'EOF' > "$DEST_DIR/40-usb-tethering"
 #!/bin/sh
+# =====================================================================
+# 脚本：40-usb-tethering
+# 适用：京东云亚瑟（单USB口）自动识别随身WiFi并创建WAN
+# 特点：自适应等待、失败重试、完整清理、无冗余
+# =====================================================================
 
-# 定义逻辑接口名
 LOGIC_NAME="usb"
+LOG_TAG="[USB_AUTO]"
+# 最长等待网络接口就绪（秒）
+MAX_WAIT=30
+# DHCP 重试次数
+RETRIES=3
+
+log() {
+    logger -t "$LOG_TAG" "$@"
+}
+
+# 等待接口真实就绪（替代固定 sleep 5）
+wait_iface_ready() {
+    local iface="$1" waited=0
+
+    while [ $waited -lt $MAX_WAIT ]; do
+        # 设备被拔走了则放弃
+        [ ! -d "/sys/class/net/$iface" ] && return 1
+
+        # 检查接口是否真正 operational（link up）
+        local flags
+        flags=$(cat "/sys/class/net/$iface/flags" 2>/dev/null)
+        # 0x1001 = UP + LOWER_UP，表示链路已通
+        if [ $((flags & 0x1001)) -eq 4097 ] 2>/dev/null; then
+            log "设备 $iface 链路就绪（${waited}s）"
+            return 0
+        fi
+
+        # 额外的：检查是否有 carrier（物理连通）
+        if [ "$(cat /sys/class/net/$iface/carrier 2>/dev/null)" = "1" ]; then
+            log "设备 $iface carrier 就绪（${waited}s）"
+            return 0
+        fi
+
+        sleep 1
+        waited=$((waited + 1))
+    done
+
+    log "设备 $iface 就绪超时（${MAX_WAIT}s）"
+    return 1
+}
+
+# 带重试的 DHCP 拉取，并验证是否拿到 IP
+ifup_with_check() {
+    local name="$1" retry=0
+
+    while [ $retry -lt $RETRIES ]; do
+        /sbin/ifup "$name" 2>/dev/null
+        sleep 4
+
+        local dev
+        dev=$(uci -q get "network.$name.device")
+        if ip -4 addr show dev "$dev" 2>/dev/null | grep -q "inet "; then
+            log "接口 $name DHCP 成功，IP: $(ip -4 addr show dev "$dev" | grep inet | awk '{print $2}')"
+            return 0
+        fi
+
+        retry=$((retry + 1))
+        [ $retry -lt $RETRIES ] && log "DHCP 第 ${retry} 次失败，重试..."
+    done
+
+    log "接口 $name DHCP 全部失败，请检查设备"
+    return 1
+}
+
+# 清理残留的地址和路由
+cleanup_net() {
+    local iface="$1"
+    ip -4 addr flush dev "$iface" 2>/dev/null
+    ip -4 route flush dev "$iface" 2>/dev/null
+    ip -6 addr flush dev "$iface" 2>/dev/null
+    ip -6 route flush dev "$iface" 2>/dev/null
+}
+
+# ===== 主逻辑 =====
 
 case "$ACTION" in
     add)
-        # 识别是否为 USB 设备 (不论是 eth0, usb0 还是 wwan0)
-        if readlink /sys/class/net/$INTERFACE/device/subsystem | grep -q "usb"; then
-            logger -t [USB_AUTO] "检测到 USB 设备插入: $INTERFACE"
+        # 校验：必须是 USB 子系统设备
+        readlink "/sys/class/net/$INTERFACE/device/subsystem" 2>/dev/null | grep -q "usb" || exit 0
 
-            # 1. 创建/更新配置 (使用 uci -q 确保操作安全)
-            if ! uci -q get network.$LOGIC_NAME >/dev/null; then
-                uci set network.$LOGIC_NAME=interface
-                uci set network.$LOGIC_NAME.proto='dhcp'
-            fi
-            uci set network.$LOGIC_NAME.device="$INTERFACE"
-            uci set network.$LOGIC_NAME.metric='10'
-            uci commit network
+        log "检测到 USB 设备插入: $INTERFACE"
 
-            # 2. 绑定防火墙 WAN 区域
-            wan_zone=$(uci show firewall | grep ".name='wan'" | cut -d. -f2)
-            if [ -n "$wan_zone" ]; then
-                if ! uci get firewall.$wan_zone.network | grep -qw "$LOGIC_NAME"; then
-                    uci add_list firewall.$wan_zone.network="$LOGIC_NAME"
-                    uci commit firewall
-                fi
-            fi
+        # 等待接口真正就绪（link up / carrier），而非固定 sleep
+        wait_iface_ready "$INTERFACE" || exit 1
 
-            # 3. 异步启动 (增加存活校验，防止快速插拔导致的无效操作)
-            (
-                sleep 5
-                if [ -d "/sys/class/net/$INTERFACE" ]; then
-                    /sbin/ifup $LOGIC_NAME
-                    /etc/init.d/firewall reload
-                    logger -t [USB_AUTO] "接口 $INTERFACE 已成功拉起并应用防火墙"
-                else
-                    logger -t [USB_AUTO] "接口 $INTERFACE 已在启动前被移除，跳过操作"
-                fi
-            ) &
+        # 创建/更新 uci 配置
+        uci -q batch <<-EOT
+            set network.$LOGIC_NAME=interface
+            set network.$LOGIC_NAME.proto='dhcp'
+            set network.$LOGIC_NAME.device='$INTERFACE'
+            set network.$LOGIC_NAME.metric='10'
+            commit network
+EOT
+
+        # 绑定防火墙 WAN 区域
+        wan_zone=$(uci show firewall | grep ".name='wan'" | cut -d. -f2 | head -1)
+        if [ -n "$wan_zone" ]; then
+            uci -q get firewall.$wan_zone.network | grep -qw "$LOGIC_NAME" || {
+                uci -q add_list firewall.$wan_zone.network="$LOGIC_NAME"
+                uci -q commit firewall
+            }
         fi
+
+        # 带重试的 DHCP 拉取
+        ifup_with_check "$LOGIC_NAME"
+
+        /etc/init.d/firewall reload 2>/dev/null
         ;;
 
     remove)
-        # 获取逻辑接口当前绑定的物理设备名
-        CURRENT_DEV=$(uci -q get network.$LOGIC_NAME.device)
-        
-        # 只有拔出的设备与配置匹配时才清理 (防止误删)
-        if [ "$INTERFACE" = "$CURRENT_DEV" ]; then
-            logger -t [USB_AUTO] "检测到 USB 设备拔出: $INTERFACE，清理残留配置..."
+        # 只处理当前绑定的设备
+        CURRENT_DEV=$(uci -q get "network.$LOGIC_NAME.device")
+        [ "$INTERFACE" != "$CURRENT_DEV" ] && exit 0
 
-            # 1. 静默关停逻辑接口
-            /sbin/ifdown $LOGIC_NAME >/dev/null 2>&1
+        log "USB 设备拔出: $INTERFACE"
 
-            # 2. 从防火墙移除
-            wan_zone=$(uci show firewall | grep ".name='wan'" | cut -d. -f2)
-            if [ -n "$wan_zone" ]; then
-                uci del_list firewall.$wan_zone.network="$LOGIC_NAME"
-                uci commit firewall
-            fi
+        # 先清理地址和路由（避免残留默认路由）
+        cleanup_net "$INTERFACE"
 
-            # 3. 删除整个逻辑接口 Section
-            uci delete network.$LOGIC_NAME
-            uci commit network
+        /sbin/ifdown "$LOGIC_NAME" >/dev/null 2>&1
 
-            # 4. 刷新防火墙状态
-            /etc/init.d/firewall reload
+        # 从防火墙移除
+        wan_zone=$(uci show firewall | grep ".name='wan'" | cut -d. -f2 | head -1)
+        if [ -n "$wan_zone" ]; then
+            uci -q del_list firewall.$wan_zone.network="$LOGIC_NAME"
+            uci -q commit firewall
         fi
+
+        uci -q delete "network.$LOGIC_NAME" && uci -q commit network
+        log "配置已清理"
+
+        /etc/init.d/firewall reload 2>/dev/null
         ;;
 esac
-EOF
-
-chmod +x "$DEST_DIR/40-usb-tethering"
-
-echo ">>> 脚本注入完成！逻辑覆盖：自动识别、快速插拔保护、彻底清理。"
-echo " "
