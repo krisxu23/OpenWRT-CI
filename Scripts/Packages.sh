@@ -29,7 +29,7 @@ UPDATE_PACKAGE() {
 
     if [[ "$PKG_SPECIAL" == "pkg" ]]; then
         for PKG_ITEM in "${PKG_LIST[@]}"; do
-            find ./$REPO_NAME/ -maxdepth 3 -type d -iname "*$PKG_ITEM*" -prune -exec cp -rf {} ./ \;
+            find ./$REPO_NAME/ -mindepth 1 -maxdepth 3 -type d -iname "*$PKG_ITEM*" -exec cp -rf {} ./ \;
         done
         rm -rf ./$REPO_NAME/
     elif [[ "$PKG_SPECIAL" == "name" ]]; then
@@ -62,7 +62,7 @@ UPDATE_PACKAGE "qbittorrent" "sbwml/luci-app-qbittorrent" "master" "" "qt6base q
 UPDATE_PACKAGE "qmodem" "FUjr/QModem" "main"
 UPDATE_PACKAGE "quickfile" "sbwml/luci-app-quickfile" "main"
 UPDATE_PACKAGE "timecontrol" "sirpdboy/luci-app-timecontrol" "main"
-UPDATE_PACKAGE "viking" "VIKINGYFY/packages" "main" "" "gecoosac luci-app-timewol luci-app-wolplus"
+UPDATE_PACKAGE "viking" "VIKINGYFY/packages" "main" "" "gecoosac luci-app-timewol luci-app-wolplus sing-box"
 UPDATE_PACKAGE "vnt" "lmq8267/luci-app-vnt" "main"
 
 UPDATE_VERSION() {
