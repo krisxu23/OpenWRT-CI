@@ -61,4 +61,9 @@ if [[ "${WRT_TARGET^^}" == *"QUALCOMMAX"* ]]; then
 		find $DTS_PATH -type f ! -iname '*nowifi*' -exec sed -i 's/ipq\(6018\|8074\).dtsi/ipq\1-nowifi.dtsi/g' {} +
 		echo "qualcommax set up nowifi successfully!"
 	fi
+	# JDCloud RE-SS-01 硬改1G内存：ath11k切换完整内存模式（省内存模式仅适用于原厂512M）
+	if [ -f "$DTS_PATH/ipq6000-re-ss-01.dts" ]; then
+		sed -i 's/qcom,ath11k-fw-memory-mode = <1>/qcom,ath11k-fw-memory-mode = <0>/' "$DTS_PATH/ipq6000-re-ss-01.dts"
+		echo "jdcloud re-ss-01 set ath11k fw memory-mode to 0 (1G RAM) done!"
+	fi
 fi
