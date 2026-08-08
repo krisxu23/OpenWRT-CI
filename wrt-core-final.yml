@@ -161,15 +161,15 @@ jobs:
           # 删除 small-package 中覆盖 OpenWrt 核心的基础包（kenzok8 官方 README 建议清理）
           rm -rf ./feeds/smpackage/{base-files,dnsmasq,firewall*,fullconenat,libnftnl,nftables,ppp,opkg,ucl,upx,vsftpd*,miniupnpd-iptables,wireless-regdb}
 
-          # Docker 全家桶保留官方已验证版本(29.6.1)，删除 smpackage 中的同名包避免重复定义
-          rm -rf ./feeds/smpackage/docker ./feeds/smpackage/dockerd ./feeds/smpackage/docker-compose
-          rm -rf ./feeds/smpackage/containerd ./feeds/smpackage/runc ./feeds/smpackage/tini
-          rm -rf ./feeds/smpackage/luci-app-dockerman ./feeds/smpackage/luci-app-docker 2>/dev/null
-
           # 删除官方 luci/packages feed 中与 kenzok8 重名的插件包，统一保留 kenzok8 版本
+          # 注意：Docker 全家桶(官方 29.6.1)保留官方已验证版本，用 kenzok8 的 29.7.2 亦可(自行取舍)
           for d in ./feeds/smpackage/*/; do
             [ -d "$d" ] || continue
             N=$(basename "$d")
+            case "$N" in
+              docker|dockerd|docker-compose|containerd|runc|tini|luci-app-dockerman|luci-app-docker)
+                continue ;;
+            esac
             rm -rf ./feeds/luci/applications/$N ./feeds/luci/collections/$N ./feeds/luci/themes/$N 2>/dev/null
             rm -rf ./feeds/packages/utils/$N ./feeds/packages/net/$N ./feeds/packages/libs/$N ./feeds/packages/admin/$N ./feeds/packages/lang/$N 2>/dev/null
           done
