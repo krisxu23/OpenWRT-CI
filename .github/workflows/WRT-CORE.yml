@@ -152,9 +152,29 @@ jobs:
         run: |
           cd ./wrt/
 
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
+          # 注入 kenzok8 插件源（small-package 为合并库，每日自动同步，含 openwrt-packages+small 内容）
+          # 注意：切勿同时注入 kenzok8/openwrt-packages，两者有51个同名包会冲突
+          sed -i '$a src-git smpackage https://github.com/kenzok8/small-package' feeds.conf.default
 
+          ./scripts/feeds update -a
+
+          # 删除 small-package 中覆盖 OpenWrt 核心的基础包（kenzok8 官方 README 建议清理）
+          rm -rf ./feeds/smpackage/{base-files,dnsmasq,firewall*,fullconenat,libnftnl,nftables,ppp,opkg,ucl,upx,vsftpd*,miniupnpd-iptables,wireless-regdb}
+
+          # 删除官方 luci/packages feed 中与 kenzok8 重名的插件包，统一保留 kenzok8 版本
+          # 注意：Docker 全家桶(官方 29.6.1)保留官方已验证版本，用 kenzok8 的 29.7.2 亦可(自行取舍)
+          for d in ./feeds/smpackage/*/; do
+            [ -d "$d" ] || continue
+            N=$(basename "$d")
+            case "$N" in
+              docker|dockerd|docker-compose|containerd|runc|tini|luci-app-dockerman|luci-app-docker)
+                continue ;;
+            esac
+            rm -rf ./feeds/luci/applications/$N ./feeds/luci/collections/$N ./feeds/luci/themes/$N 2>/dev/null
+            rm -rf ./feeds/packages/utils/$N ./feeds/packages/net/$N ./feeds/packages/libs/$N ./feeds/packages/admin/$N ./feeds/packages/lang/$N 2>/dev/null
+          done
+
+          ./scripts/feeds install -a
       - name: Custom Packages
         run: |
           cd ./wrt/package/
