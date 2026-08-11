@@ -1,21 +1,3 @@
-# ============================================================
-# JDCloud RE-SS-01（京东云亚瑟 AX1800 Pro）设备专用配置
-# 适用源码：VIKINGYFY/immortalwrt (main)
-#
-# ★ 与 GENERAL.txt 的配合方式（重要）：
-#   WRT-CORE.yml 按顺序 cat 本文件 + Config/GENERAL.txt 合并进 .config，
-#   GENERAL.txt 在后追加、同名项覆盖本文件 ⇒
-#   1) GENERAL.txt 已包含的内容（USB 内核模块层、usb-modeswitch/usbutils、
-#      kmod-veth/btrfs/dummy/tun/nf-nat6/nft-queue、编译参数、常用工具等）
-#      【不在此重复】，避免两处维护同一键导致版本漂移；
-#   2) 本文件只保留 GENERAL.txt 未覆盖的设备与补充项；
-#   3) 若想强制覆盖 GENERAL.txt 里的某项，请直接修改 GENERAL.txt。
-#
-# 样本来源：
-#   [A] laipeng668/openwrt-ci-roc   [B] ZqinKing/wrt_release（同用 VIKINGYFY/immortalwrt）
-#   [C] breeze303/openwrt-ci        [D] VIKINGYFY/OpenWRT-CI 及 forks
-# ============================================================
-
 # ---------- 设备平台 ----------
 CONFIG_TARGET_qualcommax=y
 CONFIG_TARGET_qualcommax_ipq60xx=y
@@ -54,10 +36,9 @@ CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_netgear_rbs350=n
 #   config-6.18 已内置 CONFIG_SKB_RECYCLER=y。
 #   ⇒ 无需写 kmod-qca-nss-drv-* / CONFIG_NSS_DRV_* / SKB_RECYCLER。
 
-# 仅保留 NSS 引擎固件版本选择（11.4 与 VIKINGYFY/immortalwrt 匹配，
-# ZqinKing 同源验证；若该选项不存在，make defconfig 会自动忽略，无副作用）
-CONFIG_NSS_FIRMWARE_VERSION_11_4=y
-# CONFIG_NSS_FIRMWARE_VERSION_12_5 is not set  (12.5 仅适用 laipeng668 自编译分支，勿用)
+# 仅保留 NSS 引擎固件版本选择
+CONFIG_NSS_FIRMWARE_VERSION_12_5=y
+
 
 # 说明：本机硬改 1G 内存，ath11k 走 DTS 完整内存模式（Settings.sh 已处理
 #       qcom,ath11k-fw-memory-mode = <0>），因此【不要】再开
