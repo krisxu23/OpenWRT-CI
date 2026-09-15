@@ -81,7 +81,10 @@ UPDATE_PACKAGE "timecontrol" "sirpdboy/luci-app-timecontrol" "main"
 UPDATE_PACKAGE "viking" "VIKINGYFY/packages" "main" "" "axonhub gecoosac sing-box luci-app-homeproxy luci-app-timewol luci-app-wolplus luci-app-wolultra"
 UPDATE_PACKAGE "vnt" "lmq8267/luci-app-vnt" "main"
 
-# Open-Box 透明代理一体化方���
+# 4G/5G 通用拨号工具（与 qmodem 互补，支持更多型号 USB 模块）
+UPDATE_PACKAGE "qmodem-generic" "LianXia233/luci-app-qmodem-generic" "main"
+
+# Open-Box 透明代理一体化方案
 UPDATE_PACKAGE "open-box" "liandu2024/Open-Box" "main" "pkg" "open-box"
 
 #更新软件包版本
