@@ -11,6 +11,10 @@ CONFIG_PACKAGE_luci-app-wolultra=y
 #删除插件
 CONFIG_PACKAGE_luci-app-attendedsysupgrade=n
 CONFIG_PACKAGE_luci-app-wol=n
+#Open-Box 透明代理一体化方案
+CONFIG_PACKAGE_open-box=y
+CONFIG_PACKAGE_sing-box=y
+CONFIG_PACKAGE_node=y
 #参数调整
 CONFIG_CCACHE=y
 CONFIG_DEVEL=y
