@@ -257,20 +257,10 @@ if [ -f "$RUST_FILE" ]; then
 	fi
 fi
 
-#去掉 homeproxy 对 sing-box 的版本下限，避免上游版本错位导致整个编译在最后一步崩掉
-#背景：luci-app-homeproxy 的 LUCI_EXTRA_DEPENDS 曾写死 sing-box (>=1.15.0)，而当时
-#      VIKINGYFY/packages 里的 sing-box 是 1.15.0_alpha3 —— apk 把 _alpha 当预发布版本，
-#      版本序小于 1.15.0，依赖不可满足，于是 apk 直接报
-#      "ERROR: unable to select packages" 并让 package/install（world）失败，
-#      前面几小时的编译全部作废。这里只保留"依赖 sing-box"本身，不再卡版本号。
-HP_MAKEFILE="$(find "$PKG_PATH" -maxdepth 3 -type f -wholename '*/luci-app-homeproxy/Makefile' -print -quit 2>/dev/null)"
-if [ -f "$HP_MAKEFILE" ]; then
-	echo " "
-
-	if grep -q '^LUCI_EXTRA_DEPENDS:=sing-box' "$HP_MAKEFILE"; then
-		sed -i -E 's/^(LUCI_EXTRA_DEPENDS:=sing-box).*/\1/' "$HP_MAKEFILE"
-		echo "homeproxy sing-box version constraint relaxed!"
-	else
-		echo "homeproxy has no sing-box version constraint, skipped!"
-	fi
-fi
+#注意：此处原先有一段 sed，用于删除 luci-app-homeproxy 的 LUCI_EXTRA_DEPENDS 版本约束。
+#该写法与 OpenWrt 的 apk 打包体系冲突：include/package-pack.mk 的 FormatDepends 以
+#$(word 2) 读取版本约束，EXTRA_DEPENDS 每一项必须是「包名 约束」两个词，只剩包名会直接触发
+#  $(error "Extra dependencies must have version constraints. ... seems to be unversioned.")
+#使 package/packages/luci-app-homeproxy/compile 在开始前就失败。上游 VIKINGYFY/packages
+#已把约束调整为 sing-box (>=1.14.0)，与当前 sing-box 版本相容，无需任何本地改写，故删除。
+#上游 VIKINGYFY/OpenWRT-CI 的 Scripts/Handles.sh 同样不含此段，请勿再加回。
