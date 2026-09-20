@@ -168,7 +168,14 @@ jobs:
           ./scripts/feeds update -a
 
           # 删除 small-package 中覆盖 OpenWrt 核心的基础包（kenzok8 官方 README 建议清理）
-          rm -rf ./feeds/smpackage/{base-files,dnsmasq,firewall*,fullconenat,libnftnl,nftables,ppp,opkg,ucl,upx,vsftpd*,miniupnpd-iptables,wireless-regdb}
+          # fullconenat 必须写成 fullconenat*：上游 2026-09-19 用 SONiC 方案替换了 legacy
+          # fullcone（核心树里的 fullconenat / fullconenat-nft 均已删除），但 kenzok8 这边
+          # 仍留有 fullconenat-nft —— 它内部是 define KernelPackage/nft-fullcone，产出的包名
+          # 恰好也是 kmod-nft-fullcone，会顶替被删的核心包。若只写 fullconenat（精确名），
+          # 匹配不到 fullconenat-nft，这个同名替代实现就会活下来，一旦配置里还留着
+          # CONFIG_PACKAGE_kmod-nft-fullcone=y 就会撞上 fullconenat-sonic 的互斥声明，
+          # 在 make world 最后一步 package/install 报 "unable to select packages"。
+          rm -rf ./feeds/smpackage/{base-files,dnsmasq,firewall*,fullconenat*,libnftnl,nftables,ppp,opkg,ucl,upx,vsftpd*,miniupnpd-iptables,wireless-regdb}
 
           # Docker 全家桶保留官方已验证版本(29.6.1)，删除 smpackage 中的同名包避免重复定义
           rm -rf ./feeds/smpackage/docker ./feeds/smpackage/dockerd ./feeds/smpackage/docker-compose

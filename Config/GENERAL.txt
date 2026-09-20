@@ -49,7 +49,22 @@ CONFIG_PACKAGE_kmod-nft-connlimit=y
 CONFIG_PACKAGE_kmod-nft-core=y
 CONFIG_PACKAGE_kmod-nft-dup-inet=y
 CONFIG_PACKAGE_kmod-nft-fib=y
-CONFIG_PACKAGE_kmod-nft-fullcone=y
+#fullcone：上游 VIKINGYFY/immortalwrt 已于 2026-09-19（2b190eb3 / b51fffb7）用 SONiC
+#  方案整体替换 legacy fullcone —— 核心树里 package/network/utils/fullconenat-nft 与
+#  fullconenat 已被删除，取而代之的是 fullconenat-sonic。
+#  新包 fullconenat-sonic 是 DEFAULT:=y（启用 firewall4/firewall 即自动选中），并声明
+#      CONFLICTS:=kmod-nft-fullcone kmod-ipt-fullconenat iptables-mod-fullconenat ip6tables-mod-fullconenat
+#  apk 打包体系不输出 CONFLICTS，改用 EXTRA_DEPENDS 的 "!pkg (>=0)" 表达互斥，于是
+#  只要 world 里还留着 kmod-nft-fullcone，apk 就会直接报：
+#      ERROR: unable to select packages:
+#        kmod-nft-fullcone-...:
+#          breaks: fullconenat-sonic-...[!kmod-nft-fullcone>=0]
+#          satisfies: world[kmod-nft-fullcone]
+#  注意这个包在核心树删掉后并不会变成空条目：kenzok8/small-package 的 fullconenat-nft
+#  （define KernelPackage/nft-fullcone）产出的包名恰好也是 kmod-nft-fullcone，会顶上这个
+#  位置，所以配置行照常生效、照常冲突。详见 WRT-CORE.yml 里清理 glob 的说明。
+#  上游自己的 Config/GENERAL.txt 同样已删除 kmod-nft-fullcone、改用 fullconenat-sonic。
+CONFIG_PACKAGE_fullconenat-sonic=y
 CONFIG_PACKAGE_kmod-nft-nat=y
 CONFIG_PACKAGE_kmod-nft-netdev=y
 CONFIG_PACKAGE_kmod-nft-offload=y
