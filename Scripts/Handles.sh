@@ -256,3 +256,21 @@ if [ -f "$RUST_FILE" ]; then
 		echo "rust fix failed; continuing!"
 	fi
 fi
+
+#去掉 homeproxy 对 sing-box 的版本下限，避免上游版本错位导致整个编译在最后一步崩掉
+#背景：luci-app-homeproxy 的 LUCI_EXTRA_DEPENDS 曾写死 sing-box (>=1.15.0)，而当时
+#      VIKINGYFY/packages 里的 sing-box 是 1.15.0_alpha3 —— apk 把 _alpha 当预发布版本，
+#      版本序小于 1.15.0，依赖不可满足，于是 apk 直接报
+#      "ERROR: unable to select packages" 并让 package/install（world）失败，
+#      前面几小时的编译全部作废。这里只保留"依赖 sing-box"本身，不再卡版本号。
+HP_MAKEFILE="$(find "$PKG_PATH" -maxdepth 3 -type f -wholename '*/luci-app-homeproxy/Makefile' -print -quit 2>/dev/null)"
+if [ -f "$HP_MAKEFILE" ]; then
+	echo " "
+
+	if grep -q '^LUCI_EXTRA_DEPENDS:=sing-box' "$HP_MAKEFILE"; then
+		sed -i -E 's/^(LUCI_EXTRA_DEPENDS:=sing-box).*/\1/' "$HP_MAKEFILE"
+		echo "homeproxy sing-box version constraint relaxed!"
+	else
+		echo "homeproxy has no sing-box version constraint, skipped!"
+	fi
+fi

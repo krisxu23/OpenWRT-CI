@@ -37,7 +37,14 @@ CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_netgear_rbs350=n
 #   ⇒ 无需写 kmod-qca-nss-drv-* / CONFIG_NSS_DRV_* / SKB_RECYCLER。
 
 # 仅保留 NSS 引擎固件版本选择
-CONFIG_NSS_FIRMWARE_VERSION_12_5=y
+# ★ 实测结论：VIKINGYFY/immortalwrt 里【没有】CONFIG_NSS_FIRMWARE_VERSION_* 这个选项，
+#   package/qca-nss/nss-firmware/Makefile 中版本是硬编码的：
+#       override NSS_MAJOR=12
+#       override NSS_MINOR=5   →  固定 NSS 12.5
+#   所以此前写的 11_4 / 12_5 都会被 make defconfig 静默忽略，写与不写效果相同。
+#   若确实需要 NSS 11.4（LibWrt 的 NSS 支持矩阵指出 TUNIPIP6 / WIFI WDS / WIFI MESH
+#   等功能需要 11.4），只能改上面那个 Makefile，改 .config 无效。
+#CONFIG_NSS_FIRMWARE_VERSION_12_5=y   # 源码中不存在的符号，保留仅作记录
 
 
 # 说明：本机硬改 1G 内存，ath11k 走 DTS 完整内存模式（Settings.sh 已处理

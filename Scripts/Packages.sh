@@ -84,8 +84,9 @@ UPDATE_PACKAGE "vnt" "lmq8267/luci-app-vnt" "main"
 # 4G/5G 通用拨号工具（与 qmodem 互补，支持更多型号 USB 模块）
 UPDATE_PACKAGE "qmodem-generic" "LianXia233/luci-app-qmodem-generic" "main"
 
-# Open-Box 透明代理一体化方案
-UPDATE_PACKAGE "open-box" "liandu2024/Open-Box" "main" "pkg" "open-box"
+# Open-Box 已移除：liandu2024/Open-Box 是"一键安装脚本"仓库（只有 README/docs/scripts），
+# 不含任何 OpenWrt 包目录，UPDATE_PACKAGE 提取不到 open-box 包，只会白克隆一次仓库。
+# 需要 Open-Box 请在刷好固件后用其官方 install.sh 在路由器上安装。
 
 #更新软件包版本
 UPDATE_VERSION() {

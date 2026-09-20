@@ -11,10 +11,17 @@ CONFIG_PACKAGE_luci-app-wolultra=y
 #删除插件
 CONFIG_PACKAGE_luci-app-attendedsysupgrade=n
 CONFIG_PACKAGE_luci-app-wol=n
-#Open-Box 透明代理一体化方案
-CONFIG_PACKAGE_open-box=y
-CONFIG_PACKAGE_sing-box=y
-CONFIG_PACKAGE_node=y
+#说明：原 Open-Box 三行（open-box / sing-box / node）已移除，原因见下：
+#  1) liandu2024/Open-Box 仓库只有 README/docs/scripts，不含任何 OpenWrt 包目录，
+#     UPDATE_PACKAGE 提取不到 open-box 包 ⇒ CONFIG_PACKAGE_open-box=y 被 defconfig 静默丢弃；
+#  2) CONFIG_PACKAGE_sing-box=y 会把 sing-box 写进 apk 的 world，一旦上游
+#     luci-app-homeproxy 的版本下限（曾为 >=1.15.0）与 VIKINGYFY/packages 里的
+#     sing-box 版本（曾为 1.15.0_alpha3，apk 视 alpha 为预发布，小于 1.15.0）不一致，
+#     就会直接以 "ERROR: unable to select packages" 中断整个编译；且 sing-box 本就由
+#     luci-app-homeproxy 自动依赖，无需显式选择；
+#  3) CONFIG_PACKAGE_node=y 只为 Open-Box 的 Node 运行时准备，Open-Box 装不上时
+#     白白多编译几十 MB 的 node。
+#  如需 Open-Box：刷好固件后在路由器上执行其官方脚本即可（sh install.sh）。
 #参数调整
 CONFIG_CCACHE=y
 CONFIG_DEVEL=y
