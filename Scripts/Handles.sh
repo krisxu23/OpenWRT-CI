@@ -264,3 +264,13 @@ fi
 #使 package/packages/luci-app-homeproxy/compile 在开始前就失败。上游 VIKINGYFY/packages
 #已把约束调整为 sing-box (>=1.14.0)，与当前 sing-box 版本相容，无需任何本地改写，故删除。
 #上游 VIKINGYFY/OpenWRT-CI 的 Scripts/Handles.sh 同样不含此段，请勿再加回。
+
+#USB 随身WiFi 自动 WAN：把 hotplug / init.d / uci-defaults 注入 rootfs
+#效果：USB 口插入随身WiFi 自动建 WAN 并加入防火墙 wan 区；拔出只 ifdown、保留配置
+USBWAN_SH="${GITHUB_WORKSPACE:-$(cd "$(dirname "$0")" && pwd)}/Scripts/USB-WAN.sh"
+if [ -f "$USBWAN_SH" ]; then
+	echo " "
+	bash "$USBWAN_SH"
+else
+	echo "USB-WAN.sh not found, skipped!"
+fi
