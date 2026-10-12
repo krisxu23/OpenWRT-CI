@@ -15,9 +15,7 @@
 | `QCA-ALL` | active | 只能**手动** Run workflow |
 | `OWRT-ALL` / `MTK-ALL` / `WRT-TEST` | `disabled_manually` | 已主动禁用 |
 
-`QCA-ALL` 的自动触发依赖 `workflow_run`（等 `Auto-Clean` 跑完），`Auto-Clean` 不跑 ⇒ **自动编译链路整条是断的，目前全靠手动触发。**
-
-想恢复定时自动编译，去 **Actions 页面 → 左侧选中 `Auto-Clean` / `Cache-Clean` → 点 `Enable workflow`**。不启用也不影响手动编译。
+`QCA-ALL` 的自动触发依赖 `workflow_run`（等 `Auto-Clean` 跑完），`Auto-Clean` 不跑 ⇒ **自动编译链路整条是断的，目前全靠手动触发。** 想恢复定时自动编译，去 **Actions 页面 → 左侧选中 `Auto-Clean` / `Cache-Clean` → 点 `Enable workflow`**。不启用也不影响手动编译。
 
 ## 当前重点设备：JDCloud RE-SS-01（京东云亚瑟 AX1800 Pro）
 
@@ -46,14 +44,16 @@
 
 以下为**实际在 `Config/` 中启用**的内容（已逐项核对，非愿望清单）：
 
-- **Docker 容器**：`docker` + `dockerd` + `docker-compose` + `containerd` + `runc` + `tini`，DockerMan 中文管理界面；`fuse-overlayfs`（ext4 存储驱动）+ `macvlan` + `iptables-nft` + cgroup 内核选项全套依赖已补齐
-- **科学上网**：`luci-app-homeproxy`（sing-box 内核）、`luci-app-gecoosac`
+- **Docker 容器**：`docker` + `dockerd` + `docker-compose` + `containerd` + `runc` + `tini`，DockerMan 中文管理界面；`fuse-overlayfs`（ext4 存储驱动，eMMC 推荐）+ `macvlan` + `iptables-nft` + cgroup 内核选项全套依赖已补齐
+- **科学上网**：`luci-app-homeproxy`（sing-box 由其自动依赖带入，无需显式选择）
 - **USB 网卡驱动**：RNDIS、QMI（含 Fibocom/Quectel 变体）、NCM、ECM、EEM、MBIM、Huawei CDC-NCM、RTL8150/8152、ASIX/AX88179、Sierra Wireless、iPhone tethering（`ipheth`）等全系列
 - **4G/5G 拨号**：`uqmi` + `mbim` + `comgt` + `usb-modeswitch`，以及 LuCI 的 3g / mbim / qmi / ncm / ppp / ipv6 / wireguard 协议支持
-- **磁盘管理**：`luci-app-mini-diskmanager`、`luci-app-partexp`、`luci-app-samba4`、ksmbd、btrfs、exfat、ntfs3、`automount` + `block-mount`，另有 fdisk/gdisk/sfdisk/sgdisk/cfdisk/cgdisk、smartmontools、nvme-cli、mmc-utils
-- **网络工具**：nftables fullcone NAT、`kmod-bonding`、`kmod-inet-mptcp-diag`、`luci-app-upnp`、`luci-app-wolultra`
+- **磁盘管理**：`luci-app-mini-diskmanager`、`luci-app-partexp`、`luci-app-ksmbd`（内核态 SMB，轻量快速）、exfat、ntfs3、`automount` + `block-mount`，另有 fdisk/gdisk/sfdisk/sgdisk/cfdisk/cgdisk、smartmontools、mmc-utils
+- **网络工具**：nftables fullcone NAT（sonic 方案）、`kmod-bonding`、`kmod-inet-mptcp-diag`、`luci-app-upnp`、`luci-app-wolultra`
 - **系统工具**：`cpufreq`、`autoreboot`、`zram-swap`（内存压缩交换）、`htop`、`iperf3`、`coremark`、`dmesg`
-- **文件系统**：btrfs / ksmbd / fuse / exfat / vfat / ntfs3，含 UTF-8 中文文件名支持（`kmod-nls-utf8`）
+- **文件系统**：ksmbd / fuse / exfat / vfat / ntfs3，含 UTF-8 中文文件名支持（`kmod-nls-utf8`）
+
+> 说明：亚瑟只有 USB + eMMC（走 `sdhci` / `usb-storage`），无 SATA/NVMe/NAND；交换走 ESS/ssdk 而非 DSA；Docker 走 ext4 而非 btrfs。因此 `kmod-ata-*` / `kmod-nvme` / `nand-utils` / `nvme-cli` / `libnvme` / 音频（`kmod-sound-core` / `kmod-usb-audio`）/ `kmod-dsa` / `kmod-fs-btrfs` 已从 `Config/GENERAL.txt` 移除。SMB 只保留内核态 ksmbd（`samba4` 体积大 10MB+ 且与 ksmbd 同抢 445 端口，不双装）。集客 AC（`gecoosac`，二进制大、常驻内存，单台亚瑟无被管 AP）与 `diskman`（与 mini-diskmanager 功能重叠）默认不进固件，需要时再装。
 
 ### 已拉取但未启用（想用自己加）
 
@@ -67,10 +67,12 @@
 | PassWall / PassWall2 | `CONFIG_PACKAGE_luci-app-passwall=y` / `luci-app-passwall2` |
 | MosDNS | `CONFIG_PACKAGE_luci-app-mosdns=y` |
 | qBittorrent | `CONFIG_PACKAGE_luci-app-qbittorrent=y` |
+| 集客 AC（单机不需要，组网再加） | `CONFIG_PACKAGE_luci-app-gecoosac=y` |
+| Samba4（与 ksmbd 二选一，同抢 445，1G 路由建议用 ksmbd） | `CONFIG_PACKAGE_luci-app-samba4=y`（同时把 `luci-app-ksmbd` 置 `=n`） |
 | ddns-go / easytier / vnt / netwizard / timecontrol / openlist2 / quickfile | 见 `Packages.sh` 中的包名 |
 | 其他主题（aurora / kucat / noobwrt / shadcn / fluent） | `CONFIG_PACKAGE_luci-theme-xxx=y` |
 
-> 注意：部分插件会连带拉进很大的依赖（如 qBittorrent 要 `qt6base`/`rblibtorrent`），会明显拉长编译时间与固件体积。
+> 注意：部分插件会连带拉进很大的依赖（如 qBittorrent 要 `qt6base`/`rblibtorrent`），会明显拉长编译时间与固件体积。1G 内存跑 Docker 建议只起 1~2 个轻容器（`free` 应可见 ~900MB），别上重型 Java/ BT 组合。
 
 ## 目录结构
 
@@ -84,10 +86,10 @@
 │   ├── Auto-Clean.yml   # 每日自动清理并触发编译（fork 中定时被禁用）
 │   └── Cache-Clean.yml  # 缓存清理（fork 中定时被禁用）
 ├── Config/              # 编译配置（设备列表 + 插件选择）
-│   ├── GENERAL.txt            # 公共插件配置（所有配置共用）
-│   ├── IPQ60XX-WIFI-YES.txt   # ★ 当前实际使用的配置（仅 RE-SS-01）
-│   ├── IPQ60XX-JDCLOUD.txt    # IPQ60XX 京东云专用（备用/未挂到工作流）
-│   ├── IPQ60XX-WIFI-NO.txt    # IPQ60XX 无 WiFi 版
+│   ├── GENERAL.txt      # 公共插件配置（所有配置共用）
+│   ├── IPQ60XX-WIFI-YES.txt  # ★ 当前实际使用的配置（仅 RE-SS-01）
+│   ├── IPQ60XX-JDCLOUD.txt   # IPQ60XX 京东云专用（备用/未挂到工作流）
+│   ├── IPQ60XX-WIFI-NO.txt   # IPQ60XX 无 WiFi 版
 │   ├── IPQ807X-WIFI-YES/NO.txt
 │   ├── MEDIATEK-WIFI-YES/NO.txt
 │   ├── ROCKCHIP.txt / X86.txt
@@ -103,11 +105,7 @@
 `WRT-CORE.yml` 是真正的编译核心，被 `QCA-ALL.yml` 通过 `workflow_call` 调用。步骤依次为：
 
 ```
-Checkout Projects → Initialization Environment → Initialization Values → Clone Code
-→ Check Scripts → Restore Build Cache → Prepare Restored Build Cache
-→ Update Feeds → Custom Packages → Custom Settings → Download Packages
-→ Compile Firmware → Save Build Cache → Machine Information
-→ Package Firmware → Release Firmware
+Checkout Projects → Initialization Environment → Initialization Values → Clone Code → Check Scripts → Restore Build Cache → Prepare Restored Build Cache → Update Feeds → Custom Packages → Custom Settings → Download Packages → Compile Firmware → Save Build Cache → Machine Information → Package Firmware → Release Firmware
 ```
 
 另有独立的 `cache-rollover` job 负责清理过期缓存代际。
@@ -168,9 +166,7 @@ CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-ss-01=y
 
 ### 调整默认 IP / WiFi / 主题
 
-编辑 `.github/workflows/QCA-ALL.yml` 中传给核心的变量：`WRT_IP`、`WRT_SSID`、`WRT_WORD`、`WRT_THEME`、`WRT_NAME`、`WRT_PW`。
-
-这些值由 `Scripts/Settings.sh` 在编译期落地：改默认 IP 与主机名、改 WiFi SSID/密码、把 LuCI 默认主题 `luci-theme-bootstrap` 替换成 `WRT_THEME` 指定的主题，并追加 `CONFIG_PACKAGE_luci-theme-<主题>=y` 到 `.config`。**所以主题不需要写进 `Config/*.txt`。**
+编辑 `.github/workflows/QCA-ALL.yml` 中传给核心的变量：`WRT_IP`、`WRT_SSID`、`WRT_WORD`、`WRT_THEME`、`WRT_NAME`、`WRT_PW`。 这些值由 `Scripts/Settings.sh` 在编译期落地：改默认 IP 与主机名、改 WiFi SSID/密码、把 LuCI 默认主题 `luci-theme-bootstrap` 替换成 `WRT_THEME` 指定的主题，并追加 `CONFIG_PACKAGE_luci-theme-<主题>=y` 到 `.config`。**所以主题不需要写进 `Config/*.txt`。**
 
 ### 更换源码
 
@@ -178,13 +174,13 @@ CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_jdcloud_re-ss-01=y
 
 ## 参考链接
 
-- 源码：<https://github.com/VIKINGYFY/immortalwrt.git>
-- 原版 CI：<https://github.com/VIKINGYFY/OpenWRT-CI.git>
-- 第三方插件源：<https://github.com/kenzok8/small-package.git>
-- 高通 U-Boot（沉心）：<https://github.com/chenxin527/uboot-qsdk12.5-build.git>
-- 高通 U-Boot（小猪）：<https://github.com/1980490718/u-boot-2016.git>
-- 联发科 U-Boot：<https://github.com/VIKINGYFY/UBOOT-CI/releases>
-- 本地编译工具：<https://github.com/VIKINGYFY/OWRT-Tools.git>
+- 源码：
+- 原版 CI：
+- 第三方插件源：
+- 高通 U-Boot（沉心）：
+- 高通 U-Boot（小猪）：
+- 联发科 U-Boot：
+- 本地编译工具：
 
 ## 致谢
 
